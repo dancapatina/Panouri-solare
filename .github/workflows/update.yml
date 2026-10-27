@@ -1,0 +1,46 @@
+name: Update Solar Data
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # la fiecare 10 minute
+  workflow_dispatch:          # pornire manuală din GitHub
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --quiet requests selenium webdriver-manager openpyxl
+
+      - name: Install Chrome
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update -qq
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Run solar update
+        env:
+          FUSIONSOLAR_USER: ${{ secrets.FUSIONSOLAR_USER }}
+          FUSIONSOLAR_PASS: ${{ secrets.FUSIONSOLAR_PASS }}
+        run: python solar_actions.py
+
+      - name: Commit and push JSON
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add fusionsolar_data.json
+          git diff --staged --quiet || git commit -m "auto: solar update $(date '+%Y-%m-%d %H:%M')"
+          git push
