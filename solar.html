@@ -11,6 +11,7 @@
     --dinpv:   #ED7D31;
     --retea:   #4472C4;
     --consum:  #7030A0;
+    --instant: #00D4FF;
     --bg:      #0f1117;
     --card:    #1a1d27;
     --border:  #2a2d3a;
@@ -18,289 +19,494 @@
     --muted:   #8b8fa8;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 
-  header { background: #111520; padding: 14px 16px 10px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
-  header h1 { font-size: 16px; font-weight: 700; letter-spacing: .5px; }
+  /* ── HEADER ── */
+  header {
+    background: #111520;
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 20;
+  }
+  .hdr-row1 { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .hdr-left { display: flex; align-items: center; gap: 10px; }
+  header h1 { font-size: 15px; font-weight: 700; white-space: nowrap; }
   header h1 span { color: var(--pv); }
-  #actualizat { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-  /* LIVE */
-  #live-section { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 10px 16px; }
-  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 9px 6px; text-align: center; }
-  .kpi .val { font-size: 15px; font-weight: 700; }
-  .kpi .lbl { font-size: 9px; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: .3px; }
-  .kpi.pv     .val { color: var(--pv); }
-  .kpi.livrat .val { color: var(--livrat); }
-  .kpi.dinpv  .val { color: var(--dinpv); }
-  .kpi.retea  .val { color: var(--retea); }
-  .kpi.consum .val { color: var(--consum); }
+  /* Ceas */
+  #ceas {
+    font-size: 22px; font-weight: 800; letter-spacing: 1px;
+    background: linear-gradient(90deg, var(--pv), var(--instant));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-variant-numeric: tabular-nums;
+  }
 
-  /* TABS */
-  .tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 16px; gap: 4px; }
-  .tab { padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
-  .tab.active { color: var(--pv); border-bottom-color: var(--pv); }
+  /* Controale */
+  .ctrl { display: flex; align-items: center; gap: 5px; }
+  #sel-interval {
+    background: #1e2130; color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 6px; font-size: 12px; cursor: pointer;
+  }
+  #btn-refresh {
+    background: #1e2130; color: var(--pv); border: 1px solid var(--pv);
+    border-radius: 6px; padding: 4px 11px; font-size: 14px; font-weight: 700;
+    cursor: pointer;
+  }
+  #btn-refresh:active { opacity: .7; }
 
-  /* PANEL */
-  .panel { display: none; padding: 12px 16px 32px; }
+  /* Status bar */
+  .hdr-status { display: flex; align-items: center; gap: 8px; margin-top: 5px; flex-wrap: wrap; }
+  #actualizat  { font-size: 10px; color: var(--muted); }
+  #timp-scurs  { font-size: 10px; color: var(--muted); }
+  #next-update { font-size: 10px; color: var(--muted); }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); margin-right: 3px; transition: background .3s; }
+  .dot.ok  { background: #00B050; }
+  .dot.old { background: #f87171; }
+
+  /* ── CARDURI ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 10px 12px 0;
+  }
+  .kpi {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 13px 6px 11px;
+    text-align: center;
+    position: relative; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .kpi::before {
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+  .kpi.instant::before { background: var(--instant); }
+  .kpi.pv::before      { background: var(--pv); }
+  .kpi.livrat::before  { background: var(--livrat); }
+  .kpi.dinpv::before   { background: var(--dinpv); }
+  .kpi.retea::before   { background: var(--retea); }
+  .kpi.consum::before  { background: var(--consum); }
+
+  .kpi .val  { font-size: 22px; font-weight: 800; letter-spacing: -.5px; line-height: 1.1; }
+  .kpi .unit { font-size: 11px; font-weight: 500; opacity: .65; }
+  .kpi .lbl  { font-size: 9px; color: var(--muted); margin-top: 5px; text-transform: uppercase; letter-spacing: .4px; line-height: 1.3; }
+
+  .kpi.instant .val { color: var(--instant); }
+  .kpi.pv      .val { color: var(--pv); }
+  .kpi.livrat  .val { color: var(--livrat); }
+  .kpi.dinpv   .val { color: var(--dinpv); }
+  .kpi.retea   .val { color: var(--retea); }
+  .kpi.consum  .val { color: var(--consum); }
+
+  /* separator între cele două rânduri */
+  .grid-sep { height: 8px; }
+
+  /* ── BUTOANE ISTORIC ── */
+  .btn-grup-ist {
+    display: flex; gap: 8px; padding: 10px 12px 4px;
+  }
+  .btn-ist {
+    flex: 1;
+    padding: 11px 4px; border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn-ist:active { transform: scale(.96); }
+  .btn-zile  { background: #2a2310; color: var(--pv);     border: 1px solid var(--pv); }
+  .btn-luni  { background: #0e2218; color: var(--livrat); border: 1px solid var(--livrat); }
+  .btn-ani   { background: #1a1240; color: #a78bfa;       border: 1px solid #a78bfa; }
+  .btn-ist.activ { opacity: 1; }
+  .btn-ist:not(.activ) { opacity: .6; }
+
+  /* ── VIEW ISTORIC ── */
+  #view-live     { display: block; }
+  #view-istorice { display: none; }
+
+  .btn-inapoi {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #1e2130; color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 600;
+    cursor: pointer; margin: 10px 12px 0;
+  }
+  .btn-inapoi:active { opacity: .7; }
+
+  .panel { display: none; padding: 8px 12px 32px; }
   .panel.active { display: block; }
+  .panel-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
 
-  /* TABLE */
+  /* ── TABEL ── */
   .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; border: 1px solid var(--border); }
   table { border-collapse: collapse; width: 100%; min-width: 340px; }
-  thead th { background: #1e2130; padding: 8px 8px; font-size: 12px; font-weight: 700; text-align: center; white-space: nowrap; border-bottom: 1px solid var(--border); }
+  thead th { background: #1e2130; padding: 8px; font-size: 12px; font-weight: 700; text-align: center; white-space: nowrap; border-bottom: 1px solid var(--border); }
   thead th.th-data { text-align: left; min-width: 82px; }
-  thead th.pv    { color: var(--pv); }
-  thead th.livrat{ color: var(--livrat); }
-  thead th.dinpv { color: var(--dinpv); }
-  thead th.retea { color: var(--retea); }
-  thead th.consum{ color: var(--consum); }
+  thead th.pv     { color: var(--pv); }
+  thead th.livrat { color: var(--livrat); }
+  thead th.dinpv  { color: var(--dinpv); }
+  thead th.retea  { color: var(--retea); }
+  thead th.consum { color: var(--consum); }
   tbody tr { border-bottom: 1px solid var(--border); }
   tbody tr:last-child { border-bottom: none; }
   tbody tr:nth-child(even) { background: #161924; }
   tbody td { padding: 8px 10px; font-size: 15px; font-weight: 600; text-align: right; white-space: nowrap; }
   tbody td.td-data { text-align: left; font-weight: 700; font-size: 14px; color: var(--text); }
-  tbody td.td-sep { background: #1e2130; color: var(--muted); font-size: 12px; font-weight: 700; text-align: center; padding: 6px 8px; }
+  tbody td.td-sep  { background: #1e2130; color: var(--muted); font-size: 12px; font-weight: 700; text-align: center; padding: 6px 8px; }
   tbody td.c-pv     { color: var(--pv); }
   tbody td.c-livrat { color: var(--livrat); }
   tbody td.c-dinpv  { color: var(--dinpv); }
   tbody td.c-retea  { color: var(--retea); }
   tbody td.c-consum { color: var(--consum); }
-
-  /* sub-headers pentru Luni/Ani */
   thead tr.subh th { background: #151825; font-size: 10px; font-weight: 400; color: var(--muted); padding: 3px 8px; border-bottom: 1px solid var(--border); }
 
-  .no-data { text-align: center; padding: 32px; color: var(--muted); }
-  #eroare { display: none; background: #2a1010; color: #f87171; border: 1px solid #5a1010; border-radius: 8px; margin: 12px 16px; padding: 10px 14px; font-size: 13px; }
+  .no-data { text-align: center; padding: 32px; color: var(--muted); font-size: 13px; }
+  #eroare { display: none; background: #2a1010; color: #f87171; border: 1px solid #5a1010; border-radius: 8px; margin: 10px 12px; padding: 10px 14px; font-size: 13px; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>☀️ Solar Monitor — <span>Daneti</span></h1>
-  <div id="actualizat">Se încarcă...</div>
+  <div class="hdr-row1">
+    <div class="hdr-left">
+      <h1>☀️ Solar — <span>Daneti</span></h1>
+      <div id="ceas">00:00:00</div>
+    </div>
+    <div class="ctrl">
+      <select id="sel-interval" onchange="schimbaInterval(this.value)">
+        <option value="5">5 min</option>
+        <option value="10" selected>10 min</option>
+        <option value="15">15 min</option>
+        <option value="30">30 min</option>
+        <option value="60">1 oră</option>
+        <option value="120">2 ore</option>
+      </select>
+      <button id="btn-refresh" onclick="refreshManual()">↺</button>
+    </div>
+  </div>
+  <div class="hdr-status">
+    <span><span class="dot" id="dot-status"></span><span id="actualizat">Se încarcă...</span></span>
+    <span id="timp-scurs"></span>
+    <span id="next-update"></span>
+  </div>
 </header>
 
 <div id="eroare"></div>
 
-<div id="live-section">
-  <div class="kpi pv">    <div class="val" id="lv-pv">—</div>    <div class="lbl">☀️ PV azi</div></div>
-  <div class="kpi livrat"><div class="val" id="lv-liv">—</div>   <div class="lbl">🔼 Livrat</div></div>
-  <div class="kpi dinpv"> <div class="val" id="lv-dpv">—</div>   <div class="lbl">🏠 Din PV</div></div>
-  <div class="kpi retea"> <div class="val" id="lv-ret">—</div>   <div class="lbl">🔽 Din Rețea</div></div>
-  <div class="kpi consum"><div class="val" id="lv-con">—</div>   <div class="lbl">⚡ Consum</div></div>
-</div>
+<!-- ══════════════════ VIEW LIVE ══════════════════ -->
+<div id="view-live">
 
-<div class="tabs">
-  <div class="tab active" onclick="schimbaTab('zile',this)">Zile</div>
-  <div class="tab"        onclick="schimbaTab('luni',this)">Luni</div>
-  <div class="tab"        onclick="schimbaTab('ani',this)">Ani</div>
-</div>
+  <!-- Rând 1: Instant · PV Azi · Livrat -->
+  <div class="kpi-grid">
+    <div class="kpi instant">
+      <div class="val" id="lv-instant">—</div>
+      <div class="unit" id="lv-instant-unit">kW</div>
+      <div class="lbl">⚡ Putere<br>instantanee</div>
+    </div>
+    <div class="kpi pv">
+      <div class="val" id="lv-pv">—</div>
+      <div class="unit">kWh</div>
+      <div class="lbl">☀️ Producție<br>PV azi</div>
+    </div>
+    <div class="kpi livrat">
+      <div class="val" id="lv-liv">—</div>
+      <div class="unit">kWh</div>
+      <div class="lbl">🔼 Livrat<br>în rețea</div>
+    </div>
+  </div>
 
-<!-- ZILE -->
-<div class="panel active" id="panel-zile">
-  <div class="tbl-wrap">
-    <table id="tbl-zile">
-      <thead>
-        <tr>
+  <div class="grid-sep"></div>
+
+  <!-- Rând 2: Din PV · Din Rețea · Total Consum -->
+  <div class="kpi-grid">
+    <div class="kpi dinpv">
+      <div class="val" id="lv-dpv">—</div>
+      <div class="unit">kWh</div>
+      <div class="lbl">🏠 Consum casă<br>din PV</div>
+    </div>
+    <div class="kpi retea">
+      <div class="val" id="lv-ret">—</div>
+      <div class="unit">kWh</div>
+      <div class="lbl">🔽 Consum casă<br>din rețea</div>
+    </div>
+    <div class="kpi consum">
+      <div class="val" id="lv-con">—</div>
+      <div class="unit">kWh</div>
+      <div class="lbl">⚡ Consum<br>total azi</div>
+    </div>
+  </div>
+
+  <!-- Rând 3: butoane istoric -->
+  <div class="btn-grup-ist">
+    <button class="btn-ist btn-zile" onclick="arataTabel('zile')">📅 ZILE</button>
+    <button class="btn-ist btn-luni" onclick="arataTabel('luni')">📆 LUNI</button>
+    <button class="btn-ist btn-ani"  onclick="arataTabel('ani')">📊 ANI</button>
+  </div>
+
+</div><!-- /view-live -->
+
+<!-- ══════════════════ VIEW ISTORIC ══════════════════ -->
+<div id="view-istorice">
+  <button class="btn-inapoi" onclick="inapoi()">← Live</button>
+
+  <div class="panel" id="panel-zile">
+    <div class="panel-title" style="margin-top:8px">📅 Zile</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
           <th class="th-data">Data</th>
           <th class="pv">PV kWh</th>
           <th class="livrat">Livrat</th>
           <th class="dinpv">Din PV</th>
           <th class="retea">Din Rețea</th>
           <th class="consum">Consum</th>
-        </tr>
-      </thead>
-      <tbody id="body-zile"><tr><td colspan="6" class="no-data">Se încarcă...</td></tr></tbody>
-    </table>
+        </tr></thead>
+        <tbody id="body-zile"><tr><td colspan="6" class="no-data">Se încarcă...</td></tr></tbody>
+      </table>
+    </div>
   </div>
-</div>
 
-<!-- LUNI -->
-<div class="panel" id="panel-luni">
-  <div class="tbl-wrap">
-    <table id="tbl-luni">
-      <thead>
-        <tr>
-          <th class="th-data" rowspan="2">Luna</th>
-          <th class="pv"     colspan="4">☀️ PV</th>
-          <th class="livrat" colspan="4">🔼 Livrat</th>
-          <th class="dinpv"  colspan="4">🏠 Din PV</th>
-          <th class="retea"  colspan="4">🔽 Din Rețea</th>
-          <th class="consum" colspan="4">⚡ Consum</th>
-        </tr>
-        <tr class="subh">
-          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
-          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
-          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
-          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
-          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
-        </tr>
-      </thead>
-      <tbody id="body-luni"><tr><td colspan="21" class="no-data">Se încarcă...</td></tr></tbody>
-    </table>
+  <div class="panel" id="panel-luni">
+    <div class="panel-title" style="margin-top:8px">📆 Luni</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="th-data" rowspan="2">Luna</th>
+            <th class="pv"     colspan="4">☀️ PV</th>
+            <th class="livrat" colspan="4">🔼 Livrat</th>
+            <th class="dinpv"  colspan="4">🏠 Din PV</th>
+            <th class="retea"  colspan="4">🔽 Din Rețea</th>
+            <th class="consum" colspan="4">⚡ Consum</th>
+          </tr>
+          <tr class="subh">
+            <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+            <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+            <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+            <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+            <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+          </tr>
+        </thead>
+        <tbody id="body-luni"><tr><td colspan="21" class="no-data">Se încarcă...</td></tr></tbody>
+      </table>
+    </div>
   </div>
-</div>
 
-<!-- ANI -->
-<div class="panel" id="panel-ani">
-  <div class="tbl-wrap">
-    <table id="tbl-ani">
-      <thead>
-        <tr>
-          <th class="th-data" rowspan="2">An</th>
-          <th class="pv"     colspan="4">☀️ PV</th>
-          <th class="livrat" colspan="4">🔼 Livrat</th>
-          <th class="dinpv"  colspan="4">🏠 Din PV</th>
-          <th class="retea"  colspan="4">🔽 Din Rețea</th>
-          <th class="consum" colspan="4">⚡ Consum</th>
-        </tr>
-        <tr class="subh">
-          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
-          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
-          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
-          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
-          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
-        </tr>
-      </thead>
-      <tbody id="body-ani"><tr><td colspan="21" class="no-data">Se încarcă...</td></tr></tbody>
-    </table>
+  <div class="panel" id="panel-ani">
+    <div class="panel-title" style="margin-top:8px">📊 Ani</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="th-data" rowspan="2">An</th>
+            <th class="pv"     colspan="4">☀️ PV</th>
+            <th class="livrat" colspan="4">🔼 Livrat</th>
+            <th class="dinpv"  colspan="4">🏠 Din PV</th>
+            <th class="retea"  colspan="4">🔽 Din Rețea</th>
+            <th class="consum" colspan="4">⚡ Consum</th>
+          </tr>
+          <tr class="subh">
+            <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+            <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+            <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+            <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+            <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+          </tr>
+        </thead>
+        <tbody id="body-ani"><tr><td colspan="21" class="no-data">Se încarcă...</td></tr></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
 <script>
 const URL_JSON = "fusionsolar_data.json";
 
+// ── Ceas ─────────────────────────────────────────────────
+function ticTac() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,"0");
+  const m = String(now.getMinutes()).padStart(2,"0");
+  const s = String(now.getSeconds()).padStart(2,"0");
+  document.getElementById("ceas").textContent = h + ":" + m;
+}
+ticTac();
+setInterval(ticTac, 1000);
+
+// ── Interval refresh ─────────────────────────────────────
+let intervalMin = 10;
+let timerRefresh = null;
+let ultimaActualizare = "";
+let tsUltimaActualizare = null;
+let nextAt = null;
+
+function schimbaInterval(val) {
+  intervalMin = parseInt(val);
+  try { localStorage.setItem("solar_interval", val); } catch(_) {}
+  repornestTimer();
+}
+function repornestTimer() {
+  if (timerRefresh) clearInterval(timerRefresh);
+  nextAt = Date.now() + intervalMin * 60 * 1000;
+  timerRefresh = setInterval(verificaSchimbare, intervalMin * 60 * 1000);
+}
+function refreshManual() {
+  nextAt = Date.now() + intervalMin * 60 * 1000;
+  repornestTimer();
+  incarca(true);
+}
+
+// Ticker status
+setInterval(() => {
+  if (!tsUltimaActualizare) return;
+  const sec = Math.floor((Date.now() - tsUltimaActualizare) / 1000);
+  const m = Math.floor(sec / 60), s = sec % 60;
+  document.getElementById("timp-scurs").textContent =
+    "• " + (m > 0 ? m + "m " : "") + s + "s în urmă";
+  if (nextAt) {
+    const r = Math.max(0, Math.ceil((nextAt - Date.now()) / 1000));
+    const mr = Math.floor(r / 60), sr = r % 60;
+    document.getElementById("next-update").textContent =
+      "• next: " + (mr > 0 ? mr + "m " : "") + sr + "s";
+  }
+}, 1000);
+
+// ── Helpers ───────────────────────────────────────────────
 function n2(v) {
   if (v === undefined || v === null) return "—";
   return (+v).toFixed(2);
 }
-function kw(v) {
-  if (v === undefined || v === null) return "—";
-  const f = +v;
-  return f >= 1 ? f.toFixed(2) + " kW" : (f * 1000).toFixed(0) + " W";
-}
 
-function schimbaTab(id, el) {
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+// ── Navigare ─────────────────────────────────────────────
+function arataTabel(tab) {
+  document.getElementById("view-live").style.display = "none";
+  document.getElementById("view-istorice").style.display = "block";
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-  el.classList.add("active");
-  document.getElementById("panel-" + id).classList.add("active");
+  document.getElementById("panel-" + tab).classList.add("active");
+  document.querySelectorAll(".btn-ist").forEach(b => b.classList.remove("activ"));
+  document.querySelector(".btn-" + tab).classList.add("activ");
+}
+function inapoi() {
+  document.getElementById("view-istorice").style.display = "none";
+  document.getElementById("view-live").style.display = "block";
 }
 
-const PREFIX_CLS = {pv:"c-pv", livrat:"c-livrat", din_pv:"c-dinpv", din_retea:"c-retea", consum:"c-consum"};
-function rand4(v, prefix) {
-  const cls = PREFIX_CLS[prefix] || "";
-  const s = v[prefix + "_kwh_sum"]  ?? v[prefix + "_sum"]  ?? 0;
-  const m = v[prefix + "_kwh_avg"]  ?? v[prefix + "_avg"]  ?? 0;
-  const x = v[prefix + "_kwh_max"]  ?? v[prefix + "_max"]  ?? 0;
-  const n = v[prefix + "_kwh_min"]  ?? v[prefix + "_min"]  ?? 0;
-  return `<td class="${cls}">${n2(s)}</td><td class="${cls}">${n2(m)}</td><td class="${cls}">${n2(x)}</td><td class="${cls}">${n2(n)}</td>`;
+// ── Tabel helpers ─────────────────────────────────────────
+const PC = {pv:"c-pv", livrat:"c-livrat", din_pv:"c-dinpv", din_retea:"c-retea", consum:"c-consum"};
+function rand4(v, p) {
+  const c = PC[p]||"";
+  const s = v[p+"_kwh_sum"]??v[p+"_sum"]??0;
+  const m = v[p+"_kwh_avg"]??v[p+"_avg"]??0;
+  const x = v[p+"_kwh_max"]??v[p+"_max"]??0;
+  const n = v[p+"_kwh_min"]??v[p+"_min"]??0;
+  return `<td class="${c}">${n2(s)}</td><td class="${c}">${n2(m)}</td><td class="${c}">${n2(x)}</td><td class="${c}">${n2(n)}</td>`;
 }
 
-async function incarca() {
+// ── Încărcare ─────────────────────────────────────────────
+async function incarca(fortat) {
   try {
     const r = await fetch(URL_JSON + "?t=" + Date.now());
     if (!r.ok) throw new Error("HTTP " + r.status);
     const d = await r.json();
 
-    // actualizat
+    if (!fortat && d.actualizat === ultimaActualizare) return;
+    ultimaActualizare = d.actualizat;
+    tsUltimaActualizare = Date.now();
+
+    const dot = document.getElementById("dot-status");
+    dot.className = "dot ok";
+    setTimeout(() => dot.className = "dot", 3000);
+
     document.getElementById("actualizat").textContent =
       "Actualizat: " + (d.actualizat || "—");
 
-    // live — totaluri zilnice cumulate
     const lv = d.live || {};
-    function kwh(v) { return v != null ? n2(v) + " kWh" : "—"; }
-    document.getElementById("lv-pv").textContent  = kwh(lv.azi_pv_kwh);
-    document.getElementById("lv-liv").textContent = kwh(lv.azi_livrat_kwh);
-    document.getElementById("lv-dpv").textContent = kwh(lv.azi_din_pv_kwh);
-    document.getElementById("lv-ret").textContent = kwh(lv.azi_din_retea_kwh);
-    document.getElementById("lv-con").textContent = kwh(lv.azi_consum_kwh);
 
-    // ZILE
-    const zile = d.zile || {};
-    const keysZ = Object.keys(zile).sort().reverse();
-    if (keysZ.length === 0) {
-      document.getElementById("body-zile").innerHTML =
-        '<tr><td colspan="6" class="no-data">Fără date</td></tr>';
+    // Putere instantanee
+    const pInst = lv.pv_kw ?? null;
+    if (pInst !== null && pInst !== undefined) {
+      if (pInst >= 1) {
+        document.getElementById("lv-instant").textContent = (+pInst).toFixed(2);
+        document.getElementById("lv-instant-unit").textContent = "kW";
+      } else {
+        document.getElementById("lv-instant").textContent = Math.round(pInst * 1000);
+        document.getElementById("lv-instant-unit").textContent = "W";
+      }
     } else {
-      document.getElementById("body-zile").innerHTML = keysZ.map((zi, i) => {
-        const v = zile[zi];
-        const bg = i % 2 === 0 ? "" : 'style="background:#161924"';
-        return `<tr ${bg}>
-          <td class="td-data">${zi}</td>
-          <td class="c-pv"    >${n2(v.pv_kwh_sum        ?? v.pv_kwh        ?? 0)}</td>
-          <td class="c-livrat">${n2(v.livrat_kwh_sum     ?? v.livrat_kwh    ?? 0)}</td>
-          <td class="c-dinpv" >${n2(v.din_pv_kwh_sum     ?? v.din_pv_kwh    ?? 0)}</td>
-          <td class="c-retea" >${n2(v.din_retea_kwh_sum  ?? v.din_retea_kwh ?? 0)}</td>
-          <td class="c-consum">${n2(v.consum_kwh_sum      ?? v.consum_kwh    ?? 0)}</td>
-        </tr>`;
-      }).join("");
+      document.getElementById("lv-instant").textContent = "—";
     }
 
-    // LUNI
+    document.getElementById("lv-pv").textContent  = n2(lv.azi_pv_kwh);
+    document.getElementById("lv-liv").textContent = n2(lv.azi_livrat_kwh);
+    document.getElementById("lv-dpv").textContent = n2(lv.azi_din_pv_kwh);
+    document.getElementById("lv-ret").textContent = n2(lv.azi_din_retea_kwh);
+    document.getElementById("lv-con").textContent = n2(lv.azi_consum_kwh);
+
+    // Zile
+    const zile = d.zile || {};
+    const kZ = Object.keys(zile).sort().reverse();
+    document.getElementById("body-zile").innerHTML = kZ.length === 0
+      ? '<tr><td colspan="6" class="no-data">Fără date</td></tr>'
+      : kZ.map(zi => {
+          const v = zile[zi];
+          return `<tr>
+            <td class="td-data">${zi}</td>
+            <td class="c-pv"    >${n2(v.pv_kwh_sum       ??v.pv_kwh       ??0)}</td>
+            <td class="c-livrat">${n2(v.livrat_kwh_sum    ??v.livrat_kwh   ??0)}</td>
+            <td class="c-dinpv" >${n2(v.din_pv_kwh_sum    ??v.din_pv_kwh   ??0)}</td>
+            <td class="c-retea" >${n2(v.din_retea_kwh_sum ??v.din_retea_kwh??0)}</td>
+            <td class="c-consum">${n2(v.consum_kwh_sum     ??v.consum_kwh   ??0)}</td>
+          </tr>`;
+        }).join("");
+
+    // Luni
     const luni = d.luni || {};
-    const keysL = Object.keys(luni).sort().reverse();
-    if (keysL.length === 0) {
-      document.getElementById("body-luni").innerHTML =
-        '<tr><td colspan="21" class="no-data">Fără date</td></tr>';
+    const kL = Object.keys(luni).sort().reverse();
+    if (kL.length === 0) {
+      document.getElementById("body-luni").innerHTML = '<tr><td colspan="21" class="no-data">Fără date</td></tr>';
     } else {
-      let html = "", anCurent = "";
-      keysL.forEach((luna, i) => {
-        const an = luna.slice(0, 4);
-        if (an !== anCurent) {
-          anCurent = an;
-          html += `<tr><td colspan="21" class="td-sep">── Anul ${an} ──</td></tr>`;
-        }
-        const v = luni[luna];
-        html += `<tr>
-          <td class="td-data">${luna}</td>
-          ${rand4(v,"pv")}${rand4(v,"livrat")}${rand4(v,"din_pv")}${rand4(v,"din_retea")}${rand4(v,"consum")}
-        </tr>`;
+      let html = "", anC = "";
+      kL.forEach(luna => {
+        const an = luna.slice(0,4);
+        if (an !== anC) { anC = an; html += `<tr><td colspan="21" class="td-sep">── Anul ${an} ──</td></tr>`; }
+        html += `<tr><td class="td-data">${luna}</td>${rand4(luni[luna],"pv")}${rand4(luni[luna],"livrat")}${rand4(luni[luna],"din_pv")}${rand4(luni[luna],"din_retea")}${rand4(luni[luna],"consum")}</tr>`;
       });
       document.getElementById("body-luni").innerHTML = html;
     }
 
-    // ANI
+    // Ani
     const ani = d.ani || {};
-    const keysA = Object.keys(ani).sort().reverse();
-    if (keysA.length === 0) {
-      document.getElementById("body-ani").innerHTML =
-        '<tr><td colspan="21" class="no-data">Fără date</td></tr>';
-    } else {
-      document.getElementById("body-ani").innerHTML = keysA.map((an, i) => {
-        const v = ani[an];
-        return `<tr>
-          <td class="td-data">${an}</td>
-          ${rand4(v,"pv")}${rand4(v,"livrat")}${rand4(v,"din_pv")}${rand4(v,"din_retea")}${rand4(v,"consum")}
-        </tr>`;
-      }).join("");
-    }
+    const kA = Object.keys(ani).sort().reverse();
+    document.getElementById("body-ani").innerHTML = kA.length === 0
+      ? '<tr><td colspan="21" class="no-data">Fără date</td></tr>'
+      : kA.map(an => `<tr><td class="td-data">${an}</td>${rand4(ani[an],"pv")}${rand4(ani[an],"livrat")}${rand4(ani[an],"din_pv")}${rand4(ani[an],"din_retea")}${rand4(ani[an],"consum")}</tr>`).join("");
 
   } catch(e) {
-    const el = document.getElementById("eroare");
-    el.style.display = "block";
-    el.textContent = "Eroare la încărcare date: " + e.message;
+    document.getElementById("eroare").style.display = "block";
+    document.getElementById("eroare").textContent = "Eroare: " + e.message;
+    document.getElementById("dot-status").className = "dot old";
   }
 }
 
-let ultimaActualizare = "";
-
 async function verificaSchimbare() {
-  try {
-    const r = await fetch(URL_JSON + "?t=" + Date.now());
-    if (!r.ok) return;
-    const d = await r.json();
-    if (d.actualizat !== ultimaActualizare) {
-      ultimaActualizare = d.actualizat;
-      await incarca();   // reîncarcă tot dacă s-au schimbat datele
-    }
-  } catch(_) {}
+  nextAt = Date.now() + intervalMin * 60 * 1000;
+  await incarca(false);
 }
 
-incarca();
-// Verifică din 5 în 5 minute dacă JSON-ul s-a schimbat
-setInterval(verificaSchimbare, 5 * 60 * 1000);
+// Init
+try {
+  const sv = localStorage.getItem("solar_interval");
+  if (sv) {
+    intervalMin = parseInt(sv);
+    const sel = document.getElementById("sel-interval");
+    const opt = [...sel.options].find(o => o.value === sv);
+    if (opt) opt.selected = true;
+  }
+} catch(_) {}
+
+incarca(true);
+repornestTimer();
 </script>
 </body>
 </html>
