@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar Monitor — Daneti</title>
+<style>
+  :root {
+    --pv:      #FFC000;
+    --livrat:  #00B050;
+    --dinpv:   #ED7D31;
+    --retea:   #4472C4;
+    --consum:  #7030A0;
+    --bg:      #0f1117;
+    --card:    #1a1d27;
+    --border:  #2a2d3a;
+    --text:    #e8eaf0;
+    --muted:   #8b8fa8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; }
+
+  header { background: #111520; padding: 14px 16px 10px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  header h1 { font-size: 16px; font-weight: 700; letter-spacing: .5px; }
+  header h1 span { color: var(--pv); }
+  #actualizat { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* LIVE */
+  #live-section { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 10px 16px; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 9px 6px; text-align: center; }
+  .kpi .val { font-size: 15px; font-weight: 700; }
+  .kpi .lbl { font-size: 9px; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: .3px; }
+  .kpi.pv     .val { color: var(--pv); }
+  .kpi.livrat .val { color: var(--livrat); }
+  .kpi.dinpv  .val { color: var(--dinpv); }
+  .kpi.retea  .val { color: var(--retea); }
+  .kpi.consum .val { color: var(--consum); }
+
+  /* TABS */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 16px; gap: 4px; }
+  .tab { padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+  .tab.active { color: var(--pv); border-bottom-color: var(--pv); }
+
+  /* PANEL */
+  .panel { display: none; padding: 12px 16px 32px; }
+  .panel.active { display: block; }
+
+  /* TABLE */
+  .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; border: 1px solid var(--border); }
+  table { border-collapse: collapse; width: 100%; min-width: 340px; }
+  thead th { background: #1e2130; padding: 8px 8px; font-size: 12px; font-weight: 700; text-align: center; white-space: nowrap; border-bottom: 1px solid var(--border); }
+  thead th.th-data { text-align: left; min-width: 82px; }
+  thead th.pv    { color: var(--pv); }
+  thead th.livrat{ color: var(--livrat); }
+  thead th.dinpv { color: var(--dinpv); }
+  thead th.retea { color: var(--retea); }
+  thead th.consum{ color: var(--consum); }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: #161924; }
+  tbody td { padding: 8px 10px; font-size: 15px; font-weight: 600; text-align: right; white-space: nowrap; }
+  tbody td.td-data { text-align: left; font-weight: 700; font-size: 14px; color: var(--text); }
+  tbody td.td-sep { background: #1e2130; color: var(--muted); font-size: 12px; font-weight: 700; text-align: center; padding: 6px 8px; }
+  tbody td.c-pv     { color: var(--pv); }
+  tbody td.c-livrat { color: var(--livrat); }
+  tbody td.c-dinpv  { color: var(--dinpv); }
+  tbody td.c-retea  { color: var(--retea); }
+  tbody td.c-consum { color: var(--consum); }
+
+  /* sub-headers pentru Luni/Ani */
+  thead tr.subh th { background: #151825; font-size: 10px; font-weight: 400; color: var(--muted); padding: 3px 8px; border-bottom: 1px solid var(--border); }
+
+  .no-data { text-align: center; padding: 32px; color: var(--muted); }
+  #eroare { display: none; background: #2a1010; color: #f87171; border: 1px solid #5a1010; border-radius: 8px; margin: 12px 16px; padding: 10px 14px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>☀️ Solar Monitor — <span>Daneti</span></h1>
+  <div id="actualizat">Se încarcă...</div>
+</header>
+
+<div id="eroare"></div>
+
+<div id="live-section">
+  <div class="kpi pv">    <div class="val" id="lv-pv">—</div>    <div class="lbl">☀️ PV azi</div></div>
+  <div class="kpi livrat"><div class="val" id="lv-liv">—</div>   <div class="lbl">🔼 Livrat</div></div>
+  <div class="kpi dinpv"> <div class="val" id="lv-dpv">—</div>   <div class="lbl">🏠 Din PV</div></div>
+  <div class="kpi retea"> <div class="val" id="lv-ret">—</div>   <div class="lbl">🔽 Din Rețea</div></div>
+  <div class="kpi consum"><div class="val" id="lv-con">—</div>   <div class="lbl">⚡ Consum</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="schimbaTab('zile',this)">Zile</div>
+  <div class="tab"        onclick="schimbaTab('luni',this)">Luni</div>
+  <div class="tab"        onclick="schimbaTab('ani',this)">Ani</div>
+</div>
+
+<!-- ZILE -->
+<div class="panel active" id="panel-zile">
+  <div class="tbl-wrap">
+    <table id="tbl-zile">
+      <thead>
+        <tr>
+          <th class="th-data">Data</th>
+          <th class="pv">PV kWh</th>
+          <th class="livrat">Livrat</th>
+          <th class="dinpv">Din PV</th>
+          <th class="retea">Din Rețea</th>
+          <th class="consum">Consum</th>
+        </tr>
+      </thead>
+      <tbody id="body-zile"><tr><td colspan="6" class="no-data">Se încarcă...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- LUNI -->
+<div class="panel" id="panel-luni">
+  <div class="tbl-wrap">
+    <table id="tbl-luni">
+      <thead>
+        <tr>
+          <th class="th-data" rowspan="2">Luna</th>
+          <th class="pv"     colspan="4">☀️ PV</th>
+          <th class="livrat" colspan="4">🔼 Livrat</th>
+          <th class="dinpv"  colspan="4">🏠 Din PV</th>
+          <th class="retea"  colspan="4">🔽 Din Rețea</th>
+          <th class="consum" colspan="4">⚡ Consum</th>
+        </tr>
+        <tr class="subh">
+          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+        </tr>
+      </thead>
+      <tbody id="body-luni"><tr><td colspan="21" class="no-data">Se încarcă...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ANI -->
+<div class="panel" id="panel-ani">
+  <div class="tbl-wrap">
+    <table id="tbl-ani">
+      <thead>
+        <tr>
+          <th class="th-data" rowspan="2">An</th>
+          <th class="pv"     colspan="4">☀️ PV</th>
+          <th class="livrat" colspan="4">🔼 Livrat</th>
+          <th class="dinpv"  colspan="4">🏠 Din PV</th>
+          <th class="retea"  colspan="4">🔽 Din Rețea</th>
+          <th class="consum" colspan="4">⚡ Consum</th>
+        </tr>
+        <tr class="subh">
+          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+          <th>SUM</th><th>Med zi</th><th>Max zi</th><th>Min zi</th>
+        </tr>
+      </thead>
+      <tbody id="body-ani"><tr><td colspan="21" class="no-data">Se încarcă...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const URL_JSON = "fusionsolar_data.json";
+
+function n2(v) {
+  if (v === undefined || v === null) return "—";
+  return (+v).toFixed(2);
+}
+function kw(v) {
+  if (v === undefined || v === null) return "—";
+  const f = +v;
+  return f >= 1 ? f.toFixed(2) + " kW" : (f * 1000).toFixed(0) + " W";
+}
+
+function schimbaTab(id, el) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("panel-" + id).classList.add("active");
+}
+
+const PREFIX_CLS = {pv:"c-pv", livrat:"c-livrat", din_pv:"c-dinpv", din_retea:"c-retea", consum:"c-consum"};
+function rand4(v, prefix) {
+  const cls = PREFIX_CLS[prefix] || "";
+  const s = v[prefix + "_kwh_sum"]  ?? v[prefix + "_sum"]  ?? 0;
+  const m = v[prefix + "_kwh_avg"]  ?? v[prefix + "_avg"]  ?? 0;
+  const x = v[prefix + "_kwh_max"]  ?? v[prefix + "_max"]  ?? 0;
+  const n = v[prefix + "_kwh_min"]  ?? v[prefix + "_min"]  ?? 0;
+  return `<td class="${cls}">${n2(s)}</td><td class="${cls}">${n2(m)}</td><td class="${cls}">${n2(x)}</td><td class="${cls}">${n2(n)}</td>`;
+}
+
+async function incarca() {
+  try {
+    const r = await fetch(URL_JSON + "?t=" + Date.now());
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const d = await r.json();
+
+    // actualizat
+    document.getElementById("actualizat").textContent =
+      "Actualizat: " + (d.actualizat || "—");
+
+    // live — totaluri zilnice cumulate
+    const lv = d.live || {};
+    function kwh(v) { return v != null ? n2(v) + " kWh" : "—"; }
+    document.getElementById("lv-pv").textContent  = kwh(lv.azi_pv_kwh);
+    document.getElementById("lv-liv").textContent = kwh(lv.azi_livrat_kwh);
+    document.getElementById("lv-dpv").textContent = kwh(lv.azi_din_pv_kwh);
+    document.getElementById("lv-ret").textContent = kwh(lv.azi_din_retea_kwh);
+    document.getElementById("lv-con").textContent = kwh(lv.azi_consum_kwh);
+
+    // ZILE
+    const zile = d.zile || {};
+    const keysZ = Object.keys(zile).sort().reverse();
+    if (keysZ.length === 0) {
+      document.getElementById("body-zile").innerHTML =
+        '<tr><td colspan="6" class="no-data">Fără date</td></tr>';
+    } else {
+      document.getElementById("body-zile").innerHTML = keysZ.map((zi, i) => {
+        const v = zile[zi];
+        const bg = i % 2 === 0 ? "" : 'style="background:#161924"';
+        return `<tr ${bg}>
+          <td class="td-data">${zi}</td>
+          <td class="c-pv"    >${n2(v.pv_kwh_sum        ?? v.pv_kwh        ?? 0)}</td>
+          <td class="c-livrat">${n2(v.livrat_kwh_sum     ?? v.livrat_kwh    ?? 0)}</td>
+          <td class="c-dinpv" >${n2(v.din_pv_kwh_sum     ?? v.din_pv_kwh    ?? 0)}</td>
+          <td class="c-retea" >${n2(v.din_retea_kwh_sum  ?? v.din_retea_kwh ?? 0)}</td>
+          <td class="c-consum">${n2(v.consum_kwh_sum      ?? v.consum_kwh    ?? 0)}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    // LUNI
+    const luni = d.luni || {};
+    const keysL = Object.keys(luni).sort().reverse();
+    if (keysL.length === 0) {
+      document.getElementById("body-luni").innerHTML =
+        '<tr><td colspan="21" class="no-data">Fără date</td></tr>';
+    } else {
+      let html = "", anCurent = "";
+      keysL.forEach((luna, i) => {
+        const an = luna.slice(0, 4);
+        if (an !== anCurent) {
+          anCurent = an;
+          html += `<tr><td colspan="21" class="td-sep">── Anul ${an} ──</td></tr>`;
+        }
+        const v = luni[luna];
+        html += `<tr>
+          <td class="td-data">${luna}</td>
+          ${rand4(v,"pv")}${rand4(v,"livrat")}${rand4(v,"din_pv")}${rand4(v,"din_retea")}${rand4(v,"consum")}
+        </tr>`;
+      });
+      document.getElementById("body-luni").innerHTML = html;
+    }
+
+    // ANI
+    const ani = d.ani || {};
+    const keysA = Object.keys(ani).sort().reverse();
+    if (keysA.length === 0) {
+      document.getElementById("body-ani").innerHTML =
+        '<tr><td colspan="21" class="no-data">Fără date</td></tr>';
+    } else {
+      document.getElementById("body-ani").innerHTML = keysA.map((an, i) => {
+        const v = ani[an];
+        return `<tr>
+          <td class="td-data">${an}</td>
+          ${rand4(v,"pv")}${rand4(v,"livrat")}${rand4(v,"din_pv")}${rand4(v,"din_retea")}${rand4(v,"consum")}
+        </tr>`;
+      }).join("");
+    }
+
+  } catch(e) {
+    const el = document.getElementById("eroare");
+    el.style.display = "block";
+    el.textContent = "Eroare la încărcare date: " + e.message;
+  }
+}
+
+let ultimaActualizare = "";
+
+async function verificaSchimbare() {
+  try {
+    const r = await fetch(URL_JSON + "?t=" + Date.now());
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.actualizat !== ultimaActualizare) {
+      ultimaActualizare = d.actualizat;
+      await incarca();   // reîncarcă tot dacă s-au schimbat datele
+    }
+  } catch(_) {}
+}
+
+incarca();
+// Verifică din 5 în 5 minute dacă JSON-ul s-a schimbat
+setInterval(verificaSchimbare, 5 * 60 * 1000);
+</script>
+</body>
+</html>
