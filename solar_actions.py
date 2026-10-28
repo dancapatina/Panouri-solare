@@ -393,6 +393,14 @@ def main():
     log(f"Pornit: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     log("=" * 50)
 
+    # Verifică intervalul activ: 7:00 - 21:30 ora României
+    now_ro = datetime.now(zoneinfo.ZoneInfo(TZ_STR))
+    hhmm = now_ro.hour * 100 + now_ro.minute
+    log(f"Ora România: {now_ro.strftime('%H:%M')} (HHMM={hhmm})")
+    if hhmm < 700 or hhmm >= 2130:
+        log("⏸ Interval inactiv (noaptea). Se sare actualizarea.")
+        return
+
     if not PASS:
         log("❌ FUSIONSOLAR_PASS lipsește din Secrets!")
         return
