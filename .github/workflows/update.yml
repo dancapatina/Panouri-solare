@@ -2,12 +2,9 @@ name: Update Solar Data
 
 on:
   schedule:
-    - cron: '*/10 * * * *'   # la fiecare 10 minute
+    - cron: '0,10,20,30,40,50 * * * *'   # la 0,10,20,30,40,50 min
+    - cron: '5,15,25,35,45,55 * * * *'   # la 5,15,25,35,45,55 min (backup)
   workflow_dispatch:          # pornire manuală din GitHub
-
-concurrency:
-  group: solar-update
-  cancel-in-progress: true
 
 jobs:
   update:
@@ -27,14 +24,12 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --quiet requests selenium webdriver-manager openpyxl
-
       - name: Install Chrome
         run: |
           wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
           echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update -qq
           sudo apt-get install -y google-chrome-stable
-
       - name: Run solar update
         env:
           FUSIONSOLAR_USER: ${{ secrets.FUSIONSOLAR_USER }}
@@ -42,24 +37,9 @@ jobs:
         run: python solar_actions.py
 
       - name: Commit and push JSON
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
-          if [ ! -f fusionsolar_data.json ]; then
-            echo "fusionsolar_data.json nu există, skip."
-            exit 0
-          fi
-          cp fusionsolar_data.json /tmp/solar_new.json
-          git fetch origin
-          git reset --hard FETCH_HEAD
-          cp /tmp/solar_new.json fusionsolar_data.json
           git add fusionsolar_data.json
-          if git diff --staged --quiet; then
-            echo "Fără modificări, skip push."
-            exit 0
-          fi
-          git commit -m "auto: solar update $(date '+%Y-%m-%d %H:%M')"
-          git push origin HEAD
+          git diff --staged --quiet || git commit -m "auto: solar update $(date '+%Y-%m-%d %H:%M')"
+          git push
