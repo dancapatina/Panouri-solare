@@ -52,6 +52,10 @@ jobs:
             echo "fusionsolar_data.json nu există, skip."
             exit 0
           fi
+          cp fusionsolar_data.json /tmp/solar_new.json
+          git fetch origin
+          git reset --hard FETCH_HEAD
+          cp /tmp/solar_new.json fusionsolar_data.json
           git add fusionsolar_data.json
           if git diff --staged --quiet; then
             echo "Fără modificări, skip push."
