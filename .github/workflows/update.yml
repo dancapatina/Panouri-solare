@@ -2,8 +2,7 @@ name: Update Solar Data
 
 on:
   schedule:
-    - cron: '0,10,20,30,40,50 * * * *'   # la 0,10,20,30,40,50 min
-    - cron: '5,15,25,35,45,55 * * * *'   # la 5,15,25,35,45,55 min (backup)
+    - cron: '*/10 * * * *'   # la fiecare 10 minute
   workflow_dispatch:          # pornire manuală din GitHub
 
 jobs:
@@ -39,13 +38,22 @@ jobs:
         run: python solar_actions.py
 
       - name: Commit and push JSON
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          if [ ! -f fusionsolar_data.json ]; then
+            echo "fusionsolar_data.json nu există, skip."
+            exit 0
+          fi
+          git fetch origin
+          git reset --hard origin/$(git rev-parse --abbrev-ref HEAD)
           git add fusionsolar_data.json
           if git diff --staged --quiet; then
             echo "Fără modificări, skip push."
-          else
-            git commit -m "auto: solar update $(date '+%Y-%m-%d %H:%M')"
-            git push
+            exit 0
           fi
+          git commit -m "auto: solar update $(date '+%Y-%m-%d %H:%M')"
+          git push origin HEAD
