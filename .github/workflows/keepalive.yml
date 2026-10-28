@@ -1,0 +1,22 @@
+name: Keepalive
+
+on:
+  schedule:
+    - cron: '0 10 1 * *'   # prima zi a lunii la 10:00 UTC
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Păstrează workflow-ul activ
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          echo "$(date '+%Y-%m')" > .keepalive
+          git add .keepalive
+          git commit -m "chore: keepalive $(date '+%Y-%m')"
+          git push
