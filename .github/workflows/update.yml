@@ -43,9 +43,5 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add fusionsolar_data.json
-          if git diff --staged --quiet; then
-            echo "Fără modificări, skip push."
-          else
-            git commit -m "auto: solar update $(date '+%Y-%m-%d %H:%M')"
-            git push
-          fi
+          git diff --staged --quiet || git commit -m "auto: solar update $(date '+%Y-%m-%d %H:%M')"
+          git push
