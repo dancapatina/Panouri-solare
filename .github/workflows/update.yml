@@ -35,9 +35,11 @@ jobs:
       - name: Verifică interval activ (7:00-21:30 ora României)
         id: check_hours
         run: |
-          HHMM=$(TZ='Europe/Bucharest' date +%H%M)
-          echo "Ora Romania: $(TZ='Europe/Bucharest' date '+%H:%M')"
-          if [ "$HHMM" -ge "0700" ] && [ "$HHMM" -lt "2130" ]; then
+          HOUR=$(TZ='Europe/Bucharest' date +%H)
+          MIN=$(TZ='Europe/Bucharest' date +%M)
+          HHMM=$((10#$HOUR * 100 + 10#$MIN))
+          echo "Ora Romania: $HOUR:$MIN (HHMM=$HHMM)"
+          if [ "$HHMM" -ge 700 ] && [ "$HHMM" -lt 2130 ]; then
             echo "activ=true" >> $GITHUB_OUTPUT
           else
             echo "activ=false" >> $GITHUB_OUTPUT
