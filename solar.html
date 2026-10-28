@@ -335,8 +335,8 @@ ticTac();
 setInterval(ticTac, 1000);
 
 // ── Interval refresh ─────────────────────────────────────
-let intervalMin = 10;
-let timerRefresh = null;
+// Folosim un ticker la 30s în loc de setInterval lung (browserele throttle-uiesc timere > 1min)
+let intervalMin = parseInt(document.getElementById("sel-interval").value) || 5;
 let ultimaActualizare = "";
 let tsUltimaActualizare = null;
 let nextAt = null;
@@ -344,18 +344,23 @@ let nextAt = null;
 function schimbaInterval(val) {
   intervalMin = parseInt(val);
   try { localStorage.setItem("solar_interval", val); } catch(_) {}
-  repornestTimer();
+  nextAt = Date.now() + intervalMin * 60 * 1000; // resetăm countdown
 }
 function repornestTimer() {
-  if (timerRefresh) clearInterval(timerRefresh);
   nextAt = Date.now() + intervalMin * 60 * 1000;
-  timerRefresh = setInterval(verificaSchimbare, intervalMin * 60 * 1000);
 }
 function refreshManual() {
   nextAt = Date.now() + intervalMin * 60 * 1000;
-  repornestTimer();
   incarca(true);
 }
+
+// Ticker principal: verifică la fiecare 30s dacă a venit timpul să facă fetch
+setInterval(() => {
+  if (nextAt && Date.now() >= nextAt) {
+    nextAt = Date.now() + intervalMin * 60 * 1000;
+    incarca(false);
+  }
+}, 30 * 1000);
 
 // Ticker status
 setInterval(() => {
@@ -496,12 +501,8 @@ async function incarca(fortat) {
   }
 }
 
-async function verificaSchimbare() {
-  nextAt = Date.now() + intervalMin * 60 * 1000;
-  await incarca(false);
-}
 
-// Init
+// Init — citim intervalul salvat, apoi pornim timer-ul
 try {
   const sv = localStorage.getItem("solar_interval");
   if (sv) {
@@ -509,8 +510,13 @@ try {
     const sel = document.getElementById("sel-interval");
     const opt = [...sel.options].find(o => o.value === sv);
     if (opt) opt.selected = true;
+  } else {
+    // fără localStorage → luăm valoarea din selector (default 5)
+    intervalMin = parseInt(document.getElementById("sel-interval").value) || 5;
   }
-} catch(_) {}
+} catch(_) {
+  intervalMin = 5;
+}
 
 incarca(true);
 repornestTimer();
