@@ -71,6 +71,12 @@
     gap: 8px;
     padding: 10px 12px 0;
   }
+  .kpi-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 10px 12px 0;
+  }
   .kpi {
     background: var(--card);
     border-radius: 12px;
@@ -197,13 +203,8 @@
 <!-- ══════════════════ VIEW LIVE ══════════════════ -->
 <div id="view-live">
 
-  <!-- Rând 1: Instant · PV Azi · Livrat -->
+  <!-- Rând 1: PV Azi · Livrat · Consum din PV -->
   <div class="kpi-grid">
-    <div class="kpi instant">
-      <div class="val" id="lv-instant">—</div>
-      <div class="unit" id="lv-instant-unit">kW</div>
-      <div class="lbl">⚡ Putere<br>instantanee</div>
-    </div>
     <div class="kpi pv">
       <div class="val" id="lv-pv">—</div>
       <div class="unit">kWh</div>
@@ -214,17 +215,17 @@
       <div class="unit">kWh</div>
       <div class="lbl">🔼 Livrat<br>în rețea</div>
     </div>
-  </div>
-
-  <div class="grid-sep"></div>
-
-  <!-- Rând 2: Din PV · Din Rețea · Total Consum -->
-  <div class="kpi-grid">
     <div class="kpi dinpv">
       <div class="val" id="lv-dpv">—</div>
       <div class="unit">kWh</div>
       <div class="lbl">🏠 Consum casă<br>din PV</div>
     </div>
+  </div>
+
+  <div class="grid-sep"></div>
+
+  <!-- Rând 2: Din Rețea · Total Consum -->
+  <div class="kpi-grid-2">
     <div class="kpi retea">
       <div class="val" id="lv-ret">—</div>
       <div class="unit">kWh</div>
@@ -434,20 +435,6 @@ async function incarca(fortat) {
       "Actualizat: " + formatOraRO(d.actualizat);
 
     const lv = d.live || {};
-
-    // Putere instantanee
-    const pInst = lv.pv_kw ?? null;
-    if (pInst !== null && pInst !== undefined) {
-      if (pInst >= 1) {
-        document.getElementById("lv-instant").textContent = (+pInst).toFixed(2);
-        document.getElementById("lv-instant-unit").textContent = "kW";
-      } else {
-        document.getElementById("lv-instant").textContent = Math.round(pInst * 1000);
-        document.getElementById("lv-instant-unit").textContent = "W";
-      }
-    } else {
-      document.getElementById("lv-instant").textContent = "—";
-    }
 
     document.getElementById("lv-pv").textContent  = n2(lv.azi_pv_kwh);
     document.getElementById("lv-liv").textContent = n2(lv.azi_livrat_kwh);
