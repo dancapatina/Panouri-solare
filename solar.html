@@ -375,16 +375,9 @@ setInterval(() => {
 // ── Helpers ───────────────────────────────────────────────
 function formatOraRO(str) {
   if (!str) return "—";
-  // str poate fi UTC vechi ("2026-10-28 06:13:00") sau deja ora RO
-  // Tratăm ca UTC dacă vine fără info de fus orar, convertim la Europe/Bucharest
-  try {
-    const d = new Date(str.replace(" ", "T") + "Z"); // interpretăm ca UTC
-    return d.toLocaleString("ro-RO", {
-      timeZone: "Europe/Bucharest",
-      day: "2-digit", month: "2-digit",
-      hour: "2-digit", minute: "2-digit"
-    });
-  } catch(_) { return str; }
+  // str este deja ora României (salvată cu zoneinfo Europe/Bucharest în solar_actions.py)
+  // Afișăm direct, fără conversie de fus orar
+  return str.substring(0, 16).replace("T", " ");  // "YYYY-MM-DD HH:MM"
 }
 
 function n2(v) {
