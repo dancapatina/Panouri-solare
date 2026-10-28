@@ -2,9 +2,12 @@ name: Update Solar Data
 
 on:
   schedule:
-    - cron: '0,10,20,30,40,50 * * * *'   # la 0,10,20,30,40,50 min
-    - cron: '5,15,25,35,45,55 * * * *'   # la 5,15,25,35,45,55 min (backup)
+    - cron: '*/5 * * * *'   # la fiecare 5 minute
   workflow_dispatch:          # pornire manuală din GitHub
+
+concurrency:
+  group: solar-update
+  cancel-in-progress: true
 
 jobs:
   update:
