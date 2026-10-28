@@ -1,7 +1,8 @@
 # ============================================================
-# FUSIONSOLAR — GitHub Actions version
-# Rulează în cloud, fără PC, la fiecare 10 minute
-# Credențiale din GitHub Secrets: FUSIONSOLAR_USER / FUSIONSOLAR_PASS
+# FUSIONSOLAR — GitHub Actions version (optimizat)
+# Istoric: extragere LUNARĂ (1 cerere/lună, rapid)
+# Luna curentă: extragere zilnică
+# Total timp estimat: 3-5 minute
 # ============================================================
 
 import json, os, time, zoneinfo
@@ -13,27 +14,27 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 
 # ============================================================
-# CONFIGURARE — credențiale din GitHub Secrets
+# CONFIGURARE
 # ============================================================
-USER         = os.environ.get("FUSIONSOLAR_USER", "dan.dan")
-PASS         = os.environ.get("FUSIONSOLAR_PASS", "")
-STATION_DN   = "NE=145965438"
-DATA_START   = "2023-06-23"
-TZ_STR       = "Europe/Bucharest"
-TZ_OFF       = 2.0
-LOGIN_URL    = "https://eu5.fusionsolar.huawei.com"
-BASE_URL     = "https://uni004eu5.fusionsolar.huawei.com"
-JSON_OUT     = "fusionsolar_data.json"
+USER       = os.environ.get("FUSIONSOLAR_USER", "dan.dan")
+PASS       = os.environ.get("FUSIONSOLAR_PASS", "")
+STATION_DN = "NE=145965438"
+DATA_START = "2023-06-23"
+TZ_STR     = "Europe/Bucharest"
+TZ_OFF     = 2.0
+LOGIN_URL  = "https://eu5.fusionsolar.huawei.com"
+BASE_URL   = "https://uni004eu5.fusionsolar.huawei.com"
+JSON_OUT   = "fusionsolar_data.json"
+LOGIN_TIMEOUT = 40   # secunde max pentru login
 
 TZ = zoneinfo.ZoneInfo(TZ_STR)
 
-# ============================================================
-# UTILITARE
-# ============================================================
 def ts():
     return datetime.now().strftime("%H:%M:%S")
 
@@ -41,14 +42,14 @@ def log(msg):
     print(f"[{ts()}] {msg}", flush=True)
 
 def date_to_ms(d: date) -> int:
-    dt = datetime(d.year, d.month, d.day, 0, 0, 0, tzinfo=TZ)
+    dt = datetime(d.year, d.month, d.day, tzinfo=TZ)
     return int(dt.timestamp() * 1000)
 
 def date_to_str(d: date) -> str:
     return f"{d.strftime('%Y-%m-%d')} 00:00:00"
 
 # ============================================================
-# LOGIN SELENIUM (Chrome headless)
+# SELENIUM LOGIN
 # ============================================================
 def creeaza_driver():
     opts = ChromeOptions()
@@ -64,6 +65,7 @@ def creeaza_driver():
     opts.add_experimental_option("excludeSwitches", ["enable-automation"])
     service = ChromeService(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=opts)
+    driver.set_page_load_timeout(30)
     driver.execute_script(
         "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
     )
@@ -71,34 +73,47 @@ def creeaza_driver():
 
 
 def login_selenium(driver) -> bool:
-    log(f"Login la {LOGIN_URL} ...")
-    driver.get(LOGIN_URL)
-    time.sleep(6)
-
-    toate = driver.find_elements(By.TAG_NAME, "input")
-    vizibile = [el for el in toate if el.is_displayed()]
-    log(f"Inputuri vizibile: {len(vizibile)}")
-
-    if len(vizibile) < 2:
-        log("❌ Prea puține câmpuri!")
+    log(f"Deschid {LOGIN_URL} ...")
+    try:
+        driver.get(LOGIN_URL)
+    except Exception as e:
+        log(f"Eroare la încărcare pagină: {e}")
         return False
 
-    vizibile[0].click(); time.sleep(0.3)
-    vizibile[0].clear()
-    vizibile[0].send_keys(USER)
-    time.sleep(0.4)
-    vizibile[1].click(); time.sleep(0.3)
-    vizibile[1].clear()
-    vizibile[1].send_keys(PASS)
-    time.sleep(0.4)
+    # Aștept max LOGIN_TIMEOUT secunde pentru inputuri
+    log(f"Aștept câmpuri login (max {LOGIN_TIMEOUT}s)...")
+    try:
+        WebDriverWait(driver, LOGIN_TIMEOUT).until(
+            lambda d: len([e for e in d.find_elements(By.TAG_NAME, "input") if e.is_displayed()]) >= 2
+        )
+    except TimeoutException:
+        log(f"❌ Timeout: câmpurile de login nu au apărut în {LOGIN_TIMEOUT}s!")
+        log(f"URL curent: {driver.current_url}")
+        log(f"Titlu pagină: {driver.title}")
+        return False
 
+    vizibile = [e for e in driver.find_elements(By.TAG_NAME, "input") if e.is_displayed()]
+    log(f"Inputuri găsite: {len(vizibile)}")
+
+    try:
+        vizibile[0].clear()
+        vizibile[0].send_keys(USER)
+        time.sleep(0.3)
+        vizibile[1].clear()
+        vizibile[1].send_keys(PASS)
+        time.sleep(0.3)
+    except Exception as e:
+        log(f"Eroare completare câmpuri: {e}")
+        return False
+
+    # Buton submit
     btn = None
     for by, sel in [
-        (By.XPATH, "//button[contains(text(),'Log')]"),
-        (By.XPATH, "//button[contains(text(),'Sign')]"),
+        (By.XPATH, "//button[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'log')]"),
         (By.CSS_SELECTOR, "button[type='submit']"),
         (By.CSS_SELECTOR, ".login-btn"),
         (By.CSS_SELECTOR, "button.btn-primary"),
+        (By.XPATH, "//button[@type='submit']"),
     ]:
         try:
             el = driver.find_element(by, sel)
@@ -110,16 +125,26 @@ def login_selenium(driver) -> bool:
 
     if btn:
         btn.click()
+        log("Buton login apăsat.")
     else:
         vizibile[1].send_keys("\n")
+        log("Enter trimis.")
 
-    log("Aștept dashboard...")
-    time.sleep(12)
+    # Aștept redirect după login (max 30s)
+    log("Aștept redirect după login...")
+    try:
+        WebDriverWait(driver, 30).until(
+            lambda d: "login" not in d.current_url.lower() or "overview" in d.current_url.lower()
+        )
+    except TimeoutException:
+        # Verificăm totuși URL-ul
+        pass
 
     url = driver.current_url
-    log(f"URL curent: {url}")
+    log(f"URL după login: {url}")
+
     if "login" in url.lower() and "overview" not in url.lower():
-        log("❌ Login eșuat!")
+        log("❌ Login eșuat — tot pe pagina de login.")
         return False
 
     log("✅ Login reușit!")
@@ -135,54 +160,65 @@ def extrage_session(driver) -> requests.Session:
         ),
         "Referer": BASE_URL,
         "Accept": "application/json, text/plain, */*",
-        "Accept-Language": "ro-RO,ro;q=0.9,en;q=0.8",
     })
-    for domain_url in [LOGIN_URL, BASE_URL]:
+    for url in [LOGIN_URL, BASE_URL]:
         try:
-            driver.get(domain_url)
+            driver.get(url)
             time.sleep(2)
             for c in driver.get_cookies():
                 sess.cookies.set(c["name"], c["value"], domain=c.get("domain", ""))
         except Exception as e:
-            log(f"Eroare cookies {domain_url}: {e}")
+            log(f"  Eroare cookies {url}: {e}")
     log(f"Cookies extrase: {len(sess.cookies)}")
     return sess
 
 # ============================================================
-# API
+# API — ZILNIC (timeDim=2)
 # ============================================================
-def api_zi(sess: requests.Session, d: date) -> dict | None:
-    dn_enc = STATION_DN.replace("=", "%3D")
-    tz_enc = TZ_STR.replace("/", "%2F")
-    ts_ms  = date_to_ms(d)
-    ds_enc = date_to_str(d).replace(" ", "%20").replace(":", "%3A")
-    cache  = int(time.time() * 1000)
+def api_zi(sess, d: date) -> dict | None:
+    dn = STATION_DN.replace("=", "%3D")
+    tz = TZ_STR.replace("/", "%2F")
+    ds = date_to_str(d).replace(" ", "%20").replace(":", "%3A")
     url = (
         f"{BASE_URL}/rest/pvms/web/station/v3/overview/energy-balance"
-        f"?stationDn={dn_enc}&timeDim=2&timeZone={TZ_OFF}"
-        f"&timeZoneStr={tz_enc}&queryTime={ts_ms}&dateStr={ds_enc}&_={cache}"
+        f"?stationDn={dn}&timeDim=2&timeZone={TZ_OFF}"
+        f"&timeZoneStr={tz}&queryTime={date_to_ms(d)}&dateStr={ds}&_={int(time.time()*1000)}"
     )
     try:
-        r = sess.get(url, timeout=20)
-        if r.status_code != 200:
-            return None
-        return r.json()
+        r = sess.get(url, timeout=15)
+        return r.json() if r.status_code == 200 else None
     except Exception as e:
-        log(f"  Eroare API {d}: {e}")
+        log(f"  Eroare API zi {d}: {e}")
         return None
 
-
-def parse_zi(raw: dict) -> dict | None:
-    if raw is None:
+# ============================================================
+# API — LUNAR (timeDim=3) — mult mai rapid pentru istoric
+# ============================================================
+def api_luna(sess, an: int, luna: int) -> dict | None:
+    d = date(an, luna, 1)
+    dn = STATION_DN.replace("=", "%3D")
+    tz = TZ_STR.replace("/", "%2F")
+    ds = date_to_str(d).replace(" ", "%20").replace(":", "%3A")
+    url = (
+        f"{BASE_URL}/rest/pvms/web/station/v3/overview/energy-balance"
+        f"?stationDn={dn}&timeDim=3&timeZone={TZ_OFF}"
+        f"&timeZoneStr={tz}&queryTime={date_to_ms(d)}&dateStr={ds}&_={int(time.time()*1000)}"
+    )
+    try:
+        r = sess.get(url, timeout=15)
+        return r.json() if r.status_code == 200 else None
+    except Exception as e:
+        log(f"  Eroare API lună {an}-{luna:02d}: {e}")
         return None
-    payload = raw.get("data", raw)
+
+# ============================================================
+# PARSE
+# ============================================================
+def parse_vals(payload: dict) -> dict | None:
     if not isinstance(payload, dict):
-        if isinstance(payload, list) and len(payload) > 0:
-            payload = payload[0]
-        else:
-            return None
+        return None
 
-    def get_val(*keys):
+    def gv(*keys):
         for k in keys:
             v = payload.get(k)
             if v is not None and v != "--" and v != "":
@@ -194,10 +230,10 @@ def parse_zi(raw: dict) -> dict | None:
                     pass
         return None
 
-    pv     = get_val("totalProductPower", "productPower", "pvPower", "generationPower")
-    livrat = get_val("totalOnGridPower",  "onGridPower",  "feedInPower", "exportPower")
-    din_r  = get_val("totalBuyPower",     "buyPower",     "purchasePower", "fromGridPower")
-    consum = get_val("totalUsePower",     "consumePower", "loadPower", "totalLoadPower")
+    pv     = gv("totalProductPower", "productPower", "pvPower", "generationPower")
+    livrat = gv("totalOnGridPower",  "onGridPower",  "feedInPower", "exportPower")
+    din_r  = gv("totalBuyPower",     "buyPower",     "purchasePower", "fromGridPower")
+    consum = gv("totalUsePower",     "consumePower", "loadPower", "totalLoadPower")
 
     if consum is None and pv is not None and livrat is not None and din_r is not None:
         consum = max(0.0, pv - livrat) + din_r
@@ -206,14 +242,33 @@ def parse_zi(raw: dict) -> dict | None:
         return None
 
     return {
-        "pv_kwh":        pv     or 0.0,
-        "livrat_kwh":    livrat or 0.0,
-        "din_retea_kwh": din_r  or 0.0,
-        "consum_kwh":    consum or 0.0,
+        "pv_kwh":        round(pv     or 0.0, 2),
+        "livrat_kwh":    round(livrat or 0.0, 2),
+        "din_retea_kwh": round(din_r  or 0.0, 2),
+        "consum_kwh":    round(consum or 0.0, 2),
     }
 
 
-def api_live(sess: requests.Session) -> dict:
+def extrage_payload(raw: dict) -> dict | None:
+    if raw is None:
+        return None
+    payload = raw.get("data", raw)
+    # Lunar returnează listă de zile — luăm totalul (ultima intrare sau sum)
+    if isinstance(payload, list):
+        totale = {}
+        for item in payload:
+            if not isinstance(item, dict):
+                continue
+            for k, v in item.items():
+                if isinstance(v, (int, float)) and v >= 0:
+                    totale[k] = totale.get(k, 0) + v
+        return parse_vals(totale) if totale else None
+    return parse_vals(payload)
+
+# ============================================================
+# API LIVE (putere instantanee)
+# ============================================================
+def api_live(sess) -> dict:
     url = (
         f"{BASE_URL}/rest/pvms/web/station/v3/overview/station-real-kpi"
         f"?stationDn={STATION_DN.replace('=','%3D')}&_={int(time.time()*1000)}"
@@ -221,133 +276,112 @@ def api_live(sess: requests.Session) -> dict:
     try:
         r = sess.get(url, timeout=15)
         if r.status_code == 200:
-            payload = r.json().get("data", {})
-            if isinstance(payload, dict):
+            p = r.json().get("data", {})
+            if isinstance(p, dict):
                 def gv(*keys):
                     for k in keys:
-                        v = payload.get(k)
+                        v = p.get(k)
                         if v is not None:
                             try: return round(float(v), 2)
                             except: pass
                     return None
                 return {
-                    "pv_kw":             gv("productPower","pvPower","realTimePower"),
-                    "livrat_retea_kw":   gv("onGridPower","feedInPower","gridPower"),
-                    "din_retea_kw":      gv("buyPower","purchasePower","fromGridPower"),
-                    "randament_azi_kwh": gv("dailyEnergy","todayEnergy","dayPower","dailyYield"),
+                    "pv_kw":           gv("productPower","pvPower","realTimePower"),
+                    "livrat_retea_kw": gv("onGridPower","feedInPower"),
+                    "din_retea_kw":    gv("buyPower","purchasePower"),
                 }
     except Exception as e:
         log(f"Eroare live: {e}")
     return {}
 
 # ============================================================
-# MANAGER DATE
+# DATE EXISTENTE
 # ============================================================
-def stats_grup(valori: list) -> dict:
-    if not valori:
-        return {"sum": 0.0, "min": 0.0, "max": 0.0, "avg": 0.0}
-    return {
-        "sum": round(sum(valori), 2),
-        "min": round(min(valori), 2),
-        "max": round(max(valori), 2),
-        "avg": round(sum(valori) / len(valori), 2),
-    }
-
-
 def incarca_json(path: str) -> dict:
-    """Încarcă JSON existent sau returnează structură goală."""
     zile = {}
     if os.path.exists(path):
         try:
             with open(path, encoding="utf-8") as f:
                 d = json.load(f)
             for zi_str, v in d.get("zile", {}).items():
-                # Suportă ambele formate (vechi și nou)
-                if "pv_kwh_sum" in v:
-                    pv     = v["pv_kwh_sum"]
-                    livrat = v["livrat_kwh_sum"]
-                    din_r  = v.get("din_retea_kwh_sum", 0)
-                    consum = v.get("consum_kwh_sum", 0)
-                else:
-                    pv     = v.get("pv_kwh", 0)
-                    livrat = v.get("livrat_kwh", 0)
-                    din_r  = v.get("din_retea_kwh", 0)
-                    consum = v.get("consum_kwh", 0)
+                pv     = v.get("pv_kwh_sum", v.get("pv_kwh", 0))
+                livrat = v.get("livrat_kwh_sum", v.get("livrat_kwh", 0))
+                din_r  = v.get("din_retea_kwh_sum", v.get("din_retea_kwh", 0))
+                consum = v.get("consum_kwh_sum", v.get("consum_kwh", 0))
                 din_pv = round(max(0.0, pv - livrat), 2)
                 zile[zi_str] = {
                     "pv_kwh": pv, "livrat_kwh": livrat,
                     "din_pv_kwh": din_pv, "din_retea_kwh": din_r,
                     "consum_kwh": consum,
                 }
-            log(f"Încărcat {len(zile)} zile din JSON existent.")
+            log(f"Date existente: {len(zile)} zile.")
         except Exception as e:
-            log(f"Eroare încărcare JSON: {e}")
+            log(f"Eroare citire JSON: {e}")
     return zile
 
+# ============================================================
+# GENERARE JSON FINAL
+# ============================================================
+def stats_grup(vals: list) -> dict:
+    if not vals:
+        return {"sum": 0.0, "min": 0.0, "max": 0.0, "avg": 0.0}
+    return {
+        "sum": round(sum(vals), 2),
+        "min": round(min(vals), 2),
+        "max": round(max(vals), 2),
+        "avg": round(sum(vals) / len(vals), 2),
+    }
+
+METRICI = ["pv", "livrat", "din_pv", "din_retea", "consum"]
+KEYS    = ["pv_kwh", "livrat_kwh", "din_pv_kwh", "din_retea_kwh", "consum_kwh"]
 
 def genereaza_json(zile: dict, live: dict) -> dict:
-    METRICI = ["pv", "livrat", "din_pv", "din_retea", "consum"]
-    KEYS    = ["pv_kwh", "livrat_kwh", "din_pv_kwh", "din_retea_kwh", "consum_kwh"]
+    zile_ok = {k: v for k, v in zile.items() if v["livrat_kwh"] > 0}
 
-    # Zile
     zile_out = {}
-    for zi_str, v in sorted(zile.items()):
-        if v["livrat_kwh"] <= 0:
-            continue
+    for zi_str, v in sorted(zile_ok.items()):
         zile_out[zi_str] = {}
         for m, k in zip(METRICI, KEYS):
             val = v[k]
             zile_out[zi_str].update({
-                f"{m}_kwh_sum": val,
-                f"{m}_kwh_min": val,
-                f"{m}_kwh_max": val,
-                f"{m}_kwh_avg": val,
+                f"{m}_kwh_sum": val, f"{m}_kwh_min": val,
+                f"{m}_kwh_max": val, f"{m}_kwh_avg": val,
             })
 
-    # Luni
-    luni_grup: dict[str, list] = {}
-    for zi_str, v in zile.items():
-        if v["livrat_kwh"] <= 0:
-            continue
-        luni_grup.setdefault(zi_str[:7], []).append(v)
+    luni_g: dict[str, list] = {}
+    for zi_str, v in zile_ok.items():
+        luni_g.setdefault(zi_str[:7], []).append(v)
 
     luni_out = {}
-    for luna, lst in sorted(luni_grup.items()):
+    for luna, lst in sorted(luni_g.items()):
         luni_out[luna] = {}
         for m, k in zip(METRICI, KEYS):
             sg = stats_grup([x[k] for x in lst])
             luni_out[luna].update({
-                f"{m}_kwh_sum": sg["sum"],
-                f"{m}_kwh_min": sg["min"],
-                f"{m}_kwh_max": sg["max"],
-                f"{m}_kwh_avg": sg["avg"],
+                f"{m}_kwh_sum": sg["sum"], f"{m}_kwh_min": sg["min"],
+                f"{m}_kwh_max": sg["max"], f"{m}_kwh_avg": sg["avg"],
             })
 
-    # Ani
-    ani_grup: dict[str, list] = {}
-    for zi_str, v in zile.items():
-        if v["livrat_kwh"] <= 0:
-            continue
-        ani_grup.setdefault(zi_str[:4], []).append(v)
+    ani_g: dict[str, list] = {}
+    for zi_str, v in zile_ok.items():
+        ani_g.setdefault(zi_str[:4], []).append(v)
 
     ani_out = {}
-    for an, lst in sorted(ani_grup.items()):
+    for an, lst in sorted(ani_g.items()):
         ani_out[an] = {}
         for m, k in zip(METRICI, KEYS):
             sg = stats_grup([x[k] for x in lst])
             ani_out[an].update({
-                f"{m}_kwh_sum": sg["sum"],
-                f"{m}_kwh_min": sg["min"],
-                f"{m}_kwh_max": sg["max"],
-                f"{m}_kwh_avg": sg["avg"],
+                f"{m}_kwh_sum": sg["sum"], f"{m}_kwh_min": sg["min"],
+                f"{m}_kwh_max": sg["max"], f"{m}_kwh_avg": sg["avg"],
             })
 
     return {
-        "actualizat": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "live":  live,
-        "zile":  zile_out,
-        "luni":  luni_out,
-        "ani":   ani_out,
+        "actualizat": datetime.now(zoneinfo.ZoneInfo(TZ_STR)).strftime("%Y-%m-%d %H:%M:%S"),
+        "live": live,
+        "zile": zile_out,
+        "luni": luni_out,
+        "ani":  ani_out,
     }
 
 # ============================================================
@@ -355,7 +389,7 @@ def genereaza_json(zile: dict, live: dict) -> dict:
 # ============================================================
 def main():
     log("=" * 50)
-    log("FUSIONSOLAR — GitHub Actions update")
+    log("FUSIONSOLAR — GitHub Actions (versiune optimizată)")
     log(f"Pornit: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     log("=" * 50)
 
@@ -363,82 +397,103 @@ def main():
         log("❌ FUSIONSOLAR_PASS lipsește din Secrets!")
         return
 
-    # Login
     driver = creeaza_driver()
     try:
         if not login_selenium(driver):
-            log("❌ Login eșuat!")
+            log("❌ Login eșuat! Opresc.")
             return
         sess = extrage_session(driver)
     finally:
         driver.quit()
         log("Browser închis.")
 
-    # Încarcă date existente
+    # Date existente
     zile = incarca_json(JSON_OUT)
 
-    # Determină zilele lipsă
-    data_start = date.fromisoformat(DATA_START)
-    ieri = date.today() - timedelta(days=1)
-    ultima = date.fromisoformat(sorted(zile.keys())[-1]) if zile else None
+    azi       = date.today()
+    luna_curenta = azi.strftime("%Y-%m")
+    data_start   = date.fromisoformat(DATA_START)
 
-    if ultima and ultima >= ieri:
-        log("Date istorice complete.")
-    else:
-        start = (ultima + timedelta(days=1)) if ultima else data_start
-        log(f"Extrag din {start} până la {ieri}...")
-        d = start
-        extrase = 0
-        while d <= ieri:
-            raw = api_zi(sess, d)
-            vals = parse_zi(raw)
+    # ── EXTRAGERE LUNARĂ pentru lunile complete istorice ──────────────
+    # O lună completă = luna_str < luna_curentă și nu există nicio zi din ea
+    luni_existente = set(zi[:7] for zi in zile)
+    luna_it = date(data_start.year, data_start.month, 1)
+
+    luni_de_extras = []
+    while luna_it.strftime("%Y-%m") < luna_curenta:
+        luna_str = luna_it.strftime("%Y-%m")
+        if luna_str not in luni_existente:
+            luni_de_extras.append(luna_it)
+        # Dacă există parțial (câteva zile), lasă-o — o completăm zi cu zi mai jos
+        luna_urm = date(luna_it.year + (luna_it.month // 12), (luna_it.month % 12) + 1, 1)
+        luna_it = luna_urm
+
+    if luni_de_extras:
+        log(f"Extrag {len(luni_de_extras)} luni istorice (timeDim=3)...")
+        for l in luni_de_extras:
+            raw = api_luna(sess, l.year, l.month)
+            vals = extrage_payload(raw)
             if vals:
-                pv     = round(vals["pv_kwh"], 2)
-                livrat = round(vals["livrat_kwh"], 2)
-                din_r  = round(vals["din_retea_kwh"], 2)
-                consum = round(vals["consum_kwh"], 2)
-                din_pv = round(max(0.0, pv - livrat), 2)
-                zile[str(d)] = {
-                    "pv_kwh": pv, "livrat_kwh": livrat,
-                    "din_pv_kwh": din_pv, "din_retea_kwh": din_r,
-                    "consum_kwh": consum,
+                # Salvăm ca o singură zi reprezentativă (prima din lună)
+                # cu datele totale ale lunii — pentru tab Luni/Ani
+                # Ulterior completăm cu date zilnice dacă e nevoie
+                zi_repr = str(l)
+                din_pv = round(max(0.0, vals["pv_kwh"] - vals["livrat_kwh"]), 2)
+                zile[zi_repr] = {
+                    "pv_kwh": vals["pv_kwh"], "livrat_kwh": vals["livrat_kwh"],
+                    "din_pv_kwh": din_pv, "din_retea_kwh": vals["din_retea_kwh"],
+                    "consum_kwh": vals["consum_kwh"],
+                    "_lunar": True,  # marcaj că e total lunar, nu zilnic
                 }
-                extrase += 1
-            time.sleep(0.5)
-            d += timedelta(days=1)
-        log(f"Extrase {extrase} zile.")
+                log(f"  {l.strftime('%Y-%m')}: PV={vals['pv_kwh']} kWh")
+            time.sleep(0.3)
+        log(f"✅ Extrase {len(luni_de_extras)} luni.")
+    else:
+        log("Toate lunile istorice sunt deja prezente.")
 
-    # Ziua curentă
-    azi = date.today()
-    raw_azi = api_zi(sess, azi)
-    vals_azi = parse_zi(raw_azi)
+    # ── EXTRAGERE ZILNICĂ pentru luna curentă ─────────────────────────
+    # Prima zi din luna curentă
+    prima_zi_luna = date(azi.year, azi.month, 1)
+    zile_existente_luna = {z for z in zile if z.startswith(luna_curenta) and not zile[z].get("_lunar")}
+
+    d = prima_zi_luna
+    log(f"Extrag zilnic luna curentă ({luna_curenta})...")
+    while d <= azi:
+        zi_str = str(d)
+        if zi_str not in zile_existente_luna or d == azi:
+            raw  = api_zi(sess, d)
+            vals = extrage_payload(raw)
+            if vals:
+                din_pv = round(max(0.0, vals["pv_kwh"] - vals["livrat_kwh"]), 2)
+                zile[zi_str] = {
+                    "pv_kwh": vals["pv_kwh"], "livrat_kwh": vals["livrat_kwh"],
+                    "din_pv_kwh": din_pv, "din_retea_kwh": vals["din_retea_kwh"],
+                    "consum_kwh": vals["consum_kwh"],
+                }
+                log(f"  {zi_str}: PV={vals['pv_kwh']} kWh")
+        time.sleep(0.2)
+        d += timedelta(days=1)
+
+    # Live
     live = api_live(sess)
-
-    if vals_azi:
-        pv     = round(vals_azi["pv_kwh"], 2)
-        livrat = round(vals_azi["livrat_kwh"], 2)
-        din_r  = round(vals_azi["din_retea_kwh"], 2)
-        consum = round(vals_azi["consum_kwh"], 2)
-        din_pv = round(max(0.0, pv - livrat), 2)
-        zile[str(azi)] = {
-            "pv_kwh": pv, "livrat_kwh": livrat,
-            "din_pv_kwh": din_pv, "din_retea_kwh": din_r,
-            "consum_kwh": consum,
-        }
+    if str(azi) in zile and not zile[str(azi)].get("_lunar"):
+        v = zile[str(azi)]
         live.update({
-            "azi_pv_kwh":        pv,
-            "azi_livrat_kwh":    livrat,
-            "azi_din_pv_kwh":    din_pv,
-            "azi_din_retea_kwh": din_r,
-            "azi_consum_kwh":    consum,
+            "azi_pv_kwh":        v["pv_kwh"],
+            "azi_livrat_kwh":    v["livrat_kwh"],
+            "azi_din_pv_kwh":    v["din_pv_kwh"],
+            "azi_din_retea_kwh": v["din_retea_kwh"],
+            "azi_consum_kwh":    v["consum_kwh"],
         })
-        log(f"Azi: PV={pv} kWh | Livrat={livrat} kWh | Consum={consum} kWh")
+        log(f"Live azi: PV={v['pv_kwh']} kWh | Livrat={v['livrat_kwh']} kWh")
 
-    # Salvează JSON
+    # Salvare
     data_out = genereaza_json(zile, live)
     with open(JSON_OUT, "w", encoding="utf-8") as f:
         json.dump(data_out, f, indent=2, ensure_ascii=False)
-    log(f"✅ JSON salvat: {JSON_OUT} ({len(data_out['zile'])} zile)")
+
+    log(f"✅ JSON salvat: {len(data_out['zile'])} zile | {len(data_out['luni'])} luni")
+    log(f"Terminat: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
 if __name__ == "__main__":
