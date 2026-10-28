@@ -5,6 +5,10 @@ on:
     - cron: '*/10 * * * *'   # la fiecare 10 minute
   workflow_dispatch:          # pornire manuală din GitHub
 
+concurrency:
+  group: solar-update
+  cancel-in-progress: true
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -48,8 +52,6 @@ jobs:
             echo "fusionsolar_data.json nu există, skip."
             exit 0
           fi
-          git fetch origin
-          git reset --hard origin/$(git rev-parse --abbrev-ref HEAD)
           git add fusionsolar_data.json
           if git diff --staged --quiet; then
             echo "Fără modificări, skip push."
