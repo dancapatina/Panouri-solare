@@ -1,11 +1,11 @@
 {
-  "actualizat": "2026-10-28 16:46:10",
+  "actualizat": "2026-10-28 16:51:14",
   "live": {
     "azi_pv_kwh": 4.03,
     "azi_livrat_kwh": 3.12,
     "azi_din_pv_kwh": 0.91,
-    "azi_din_retea_kwh": 0.7,
-    "azi_consum_kwh": 1.61
+    "azi_din_retea_kwh": 0.71,
+    "azi_consum_kwh": 1.62
   },
   "zile": {
     "2023-06-23": {
@@ -25299,14 +25299,14 @@
       "din_pv_kwh_min": 0.91,
       "din_pv_kwh_max": 0.91,
       "din_pv_kwh_avg": 0.91,
-      "din_retea_kwh_sum": 0.7,
-      "din_retea_kwh_min": 0.7,
-      "din_retea_kwh_max": 0.7,
-      "din_retea_kwh_avg": 0.7,
-      "consum_kwh_sum": 1.61,
-      "consum_kwh_min": 1.61,
-      "consum_kwh_max": 1.61,
-      "consum_kwh_avg": 1.61
+      "din_retea_kwh_sum": 0.71,
+      "din_retea_kwh_min": 0.71,
+      "din_retea_kwh_max": 0.71,
+      "din_retea_kwh_avg": 0.71,
+      "consum_kwh_sum": 1.62,
+      "consum_kwh_min": 1.62,
+      "consum_kwh_max": 1.62,
+      "consum_kwh_avg": 1.62
     }
   },
   "luni": {
@@ -26181,12 +26181,12 @@
       "din_pv_kwh_min": 0.84,
       "din_pv_kwh_max": 9.89,
       "din_pv_kwh_avg": 2.4,
-      "din_retea_kwh_sum": 139.61,
-      "din_retea_kwh_min": 0.7,
+      "din_retea_kwh_sum": 139.62,
+      "din_retea_kwh_min": 0.71,
       "din_retea_kwh_max": 20.83,
       "din_retea_kwh_avg": 4.99,
-      "consum_kwh_sum": 206.93,
-      "consum_kwh_min": 1.61,
+      "consum_kwh_sum": 206.94,
+      "consum_kwh_min": 1.62,
       "consum_kwh_max": 30.24,
       "consum_kwh_avg": 7.39
     }
@@ -26271,12 +26271,12 @@
       "din_pv_kwh_min": 0.48,
       "din_pv_kwh_max": 26.93,
       "din_pv_kwh_avg": 3.25,
-      "din_retea_kwh_sum": 1512.71,
-      "din_retea_kwh_min": 0.7,
+      "din_retea_kwh_sum": 1512.72,
+      "din_retea_kwh_min": 0.71,
       "din_retea_kwh_max": 53.41,
       "din_retea_kwh_avg": 5.06,
-      "consum_kwh_sum": 2485.01,
-      "consum_kwh_min": 1.61,
+      "consum_kwh_sum": 2485.02,
+      "consum_kwh_min": 1.62,
       "consum_kwh_max": 64.86,
       "consum_kwh_avg": 8.31
     }
