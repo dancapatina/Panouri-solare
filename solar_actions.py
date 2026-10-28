@@ -275,12 +275,16 @@ def api_live(sess) -> dict:
     )
     try:
         r = sess.get(url, timeout=15)
-        log(f"Live status: {r.status_code}")
+        log(f"Live HTTP status: {r.status_code}")
+        log(f"Live răspuns brut (primii 500 car): {r.text[:500]}")
         if r.status_code == 200:
             raw = r.json()
+            log(f"Live JSON complet: {json.dumps(raw, ensure_ascii=False)[:800]}")
             p = raw.get("data", {})
-            log(f"Live keys disponibile: {list(p.keys()) if isinstance(p, dict) else type(p)}")
+            log(f"Live data tip: {type(p)}")
             if isinstance(p, dict):
+                log(f"Live keys: {list(p.keys())}")
+                log(f"Live valori: {dict(list(p.items())[:20])}")
                 def gv(*keys):
                     for k in keys:
                         v = p.get(k)
@@ -289,18 +293,22 @@ def api_live(sess) -> dict:
                             except: pass
                     return None
                 result = {}
-                pv_kw = gv("productPower","pvPower","realTimePower","activePower",
-                           "currentDayEnergy","installedCapacity")
-                livrat_kw = gv("onGridPower","feedInPower","gridPower")
-                din_r_kw  = gv("buyPower","purchasePower","fromGridPower")
-                # Includem doar valorile găsite (excludem None)
-                if pv_kw is not None:      result["pv_kw"] = pv_kw
-                if livrat_kw is not None:  result["livrat_retea_kw"] = livrat_kw
-                if din_r_kw is not None:   result["din_retea_kw"] = din_r_kw
-                log(f"Live extras: {result}")
+                pv_kw     = gv("productPower","pvPower","realTimePower","activePower",
+                               "currentActivePower","currentPower","power","pvActivePower",
+                               "totalActivePower","stationCurrentActivePower")
+                livrat_kw = gv("onGridPower","feedInPower","gridPower","gridActivePower",
+                               "reverseActivePower")
+                din_r_kw  = gv("buyPower","purchasePower","fromGridPower","gridBuyPower",
+                               "gridPurchasePower","usePower")
+                if pv_kw is not None:     result["pv_kw"] = pv_kw
+                if livrat_kw is not None: result["livrat_retea_kw"] = livrat_kw
+                if din_r_kw is not None:  result["din_retea_kw"] = din_r_kw
+                log(f"Live extras final: {result}")
                 return result
+            elif isinstance(p, list):
+                log(f"Live data este listă cu {len(p)} elemente: {str(p[:2])[:300]}")
         else:
-            log(f"Live răspuns eroare: {r.text[:200]}")
+            log(f"Live eroare HTTP {r.status_code}: {r.text[:300]}")
     except Exception as e:
         log(f"Eroare live: {e}")
     return {}
