@@ -275,8 +275,11 @@ def api_live(sess) -> dict:
     )
     try:
         r = sess.get(url, timeout=15)
+        log(f"Live status: {r.status_code}")
         if r.status_code == 200:
-            p = r.json().get("data", {})
+            raw = r.json()
+            p = raw.get("data", {})
+            log(f"Live keys disponibile: {list(p.keys()) if isinstance(p, dict) else type(p)}")
             if isinstance(p, dict):
                 def gv(*keys):
                     for k in keys:
@@ -285,11 +288,19 @@ def api_live(sess) -> dict:
                             try: return round(float(v), 2)
                             except: pass
                     return None
-                return {
-                    "pv_kw":           gv("productPower","pvPower","realTimePower"),
-                    "livrat_retea_kw": gv("onGridPower","feedInPower"),
-                    "din_retea_kw":    gv("buyPower","purchasePower"),
-                }
+                result = {}
+                pv_kw = gv("productPower","pvPower","realTimePower","activePower",
+                           "currentDayEnergy","installedCapacity")
+                livrat_kw = gv("onGridPower","feedInPower","gridPower")
+                din_r_kw  = gv("buyPower","purchasePower","fromGridPower")
+                # Includem doar valorile găsite (excludem None)
+                if pv_kw is not None:      result["pv_kw"] = pv_kw
+                if livrat_kw is not None:  result["livrat_retea_kw"] = livrat_kw
+                if din_r_kw is not None:   result["din_retea_kw"] = din_r_kw
+                log(f"Live extras: {result}")
+                return result
+        else:
+            log(f"Live răspuns eroare: {r.text[:200]}")
     except Exception as e:
         log(f"Eroare live: {e}")
     return {}
