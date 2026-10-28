@@ -32,32 +32,20 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y google-chrome-stable
 
-      - name: Verifică interval activ (7:00-21:30 ora României)
-        id: check_hours
-        run: |
-          HOUR=$(TZ='Europe/Bucharest' date +%H)
-          MIN=$(TZ='Europe/Bucharest' date +%M)
-          HHMM=$((10#$HOUR * 100 + 10#$MIN))
-          echo "Ora Romania: $HOUR:$MIN (HHMM=$HHMM)"
-          if [ "$HHMM" -ge 700 ] && [ "$HHMM" -lt 2130 ]; then
-            echo "activ=true" >> $GITHUB_OUTPUT
-          else
-            echo "activ=false" >> $GITHUB_OUTPUT
-            echo "Interval inactiv (noaptea), se sare actualizarea."
-          fi
-
       - name: Run solar update
-        if: steps.check_hours.outputs.activ == 'true'
         env:
           FUSIONSOLAR_USER: ${{ secrets.FUSIONSOLAR_USER }}
           FUSIONSOLAR_PASS: ${{ secrets.FUSIONSOLAR_PASS }}
         run: python solar_actions.py
 
       - name: Commit and push JSON
-        if: steps.check_hours.outputs.activ == 'true'
         run: |
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add fusionsolar_data.json
-          git diff --staged --quiet || git commit -m "auto: solar update $(TZ='Europe/Bucharest' date '+%Y-%m-%d %H:%M') RO"
-          git push
+          if git diff --staged --quiet; then
+            echo "Fără modificări, skip push."
+          else
+            git commit -m "auto: solar update $(date '+%Y-%m-%d %H:%M')"
+            git push
+          fi
