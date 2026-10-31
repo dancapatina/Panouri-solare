@@ -1,11 +1,11 @@
 {
-  "actualizat": "2026-10-31 09:46:24",
+  "actualizat": "2026-10-31 09:56:18",
   "live": {
-    "azi_pv_kwh": 1.73,
+    "azi_pv_kwh": 1.94,
     "azi_livrat_kwh": 0.0,
-    "azi_din_pv_kwh": 1.73,
-    "azi_din_retea_kwh": 5.47,
-    "azi_consum_kwh": 7.2
+    "azi_din_pv_kwh": 1.94,
+    "azi_din_retea_kwh": 5.8,
+    "azi_consum_kwh": 7.74
   },
   "zile": {
     "2023-06-23": {
