@@ -1,11 +1,11 @@
 {
-  "actualizat": "2026-11-02 18:16:20",
+  "actualizat": "2026-11-02 18:21:13",
   "live": {
     "azi_pv_kwh": 1.68,
     "azi_livrat_kwh": 0.94,
     "azi_din_pv_kwh": 0.74,
-    "azi_din_retea_kwh": 0.97,
-    "azi_consum_kwh": 1.71
+    "azi_din_retea_kwh": 0.99,
+    "azi_consum_kwh": 1.73
   },
   "zile": {
     "2023-06-23": {
@@ -25409,14 +25409,14 @@
       "din_pv_kwh_min": 0.74,
       "din_pv_kwh_max": 0.74,
       "din_pv_kwh_avg": 0.74,
-      "din_retea_kwh_sum": 0.97,
-      "din_retea_kwh_min": 0.97,
-      "din_retea_kwh_max": 0.97,
-      "din_retea_kwh_avg": 0.97,
-      "consum_kwh_sum": 1.71,
-      "consum_kwh_min": 1.71,
-      "consum_kwh_max": 1.71,
-      "consum_kwh_avg": 1.71
+      "din_retea_kwh_sum": 0.99,
+      "din_retea_kwh_min": 0.99,
+      "din_retea_kwh_max": 0.99,
+      "din_retea_kwh_avg": 0.99,
+      "consum_kwh_sum": 1.73,
+      "consum_kwh_min": 1.73,
+      "consum_kwh_max": 1.73,
+      "consum_kwh_avg": 1.73
     }
   },
   "luni": {
@@ -26313,12 +26313,12 @@
       "din_pv_kwh_min": 0.74,
       "din_pv_kwh_max": 0.98,
       "din_pv_kwh_avg": 0.86,
-      "din_retea_kwh_sum": 23.85,
-      "din_retea_kwh_min": 0.97,
+      "din_retea_kwh_sum": 23.87,
+      "din_retea_kwh_min": 0.99,
       "din_retea_kwh_max": 22.88,
-      "din_retea_kwh_avg": 11.92,
-      "consum_kwh_sum": 25.57,
-      "consum_kwh_min": 1.71,
+      "din_retea_kwh_avg": 11.93,
+      "consum_kwh_sum": 25.59,
+      "consum_kwh_min": 1.73,
       "consum_kwh_max": 23.86,
       "consum_kwh_avg": 12.79
     }
@@ -26403,12 +26403,12 @@
       "din_pv_kwh_min": 0.48,
       "din_pv_kwh_max": 26.93,
       "din_pv_kwh_avg": 3.24,
-      "din_retea_kwh_sum": 1568.34,
+      "din_retea_kwh_sum": 1568.36,
       "din_retea_kwh_min": 0.89,
       "din_retea_kwh_max": 53.41,
       "din_retea_kwh_avg": 5.16,
-      "consum_kwh_sum": 2552.28,
-      "consum_kwh_min": 1.71,
+      "consum_kwh_sum": 2552.3,
+      "consum_kwh_min": 1.73,
       "consum_kwh_max": 64.86,
       "consum_kwh_avg": 8.4
     }
