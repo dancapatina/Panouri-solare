@@ -9,8 +9,8 @@
     --pv:      #FFC000;
     --livrat:  #00B050;
     --dinpv:   #ED7D31;
-    --retea:   #4472C4;
-    --consum:  #7030A0;
+    --retea:   #FF6B6B;
+    --consum:  #00E5CC;
     --instant: #00D4FF;
     --bg:      #0f1117;
     --card:    #1a1d27;
@@ -122,11 +122,11 @@
     transition: opacity .15s, transform .1s;
   }
   .btn-ist:active { transform: scale(.96); }
-  .btn-zile  { background: #2a2310; color: var(--pv);     border: 2px solid var(--pv);     font-size: 18px; letter-spacing: 1px; padding: 13px 4px; }
-  .btn-luni  { background: #0e2218; color: var(--livrat); border: 2px solid var(--livrat); font-size: 18px; letter-spacing: 1px; padding: 13px 4px; }
-  .btn-ani   { background: #1a1240; color: #a78bfa;       border: 2px solid #a78bfa;       font-size: 18px; letter-spacing: 1px; padding: 13px 4px; }
-  .btn-ist.activ { opacity: 1; }
-  .btn-ist:not(.activ) { opacity: .6; }
+  .btn-zile  { background: #00E5CC; color: #001a18; border: 2px solid #00E5CC; font-size: 18px; font-weight: 800; letter-spacing: 1px; padding: 13px 4px; text-shadow: none; }
+  .btn-luni  { background: #69FF8E; color: #001a0e; border: 2px solid #69FF8E; font-size: 18px; font-weight: 800; letter-spacing: 1px; padding: 13px 4px; text-shadow: none; }
+  .btn-ani   { background: #FFD166; color: #1a0a00; border: 2px solid #FFD166; font-size: 18px; font-weight: 800; letter-spacing: 1px; padding: 13px 4px; text-shadow: none; }
+  .btn-ist.activ { opacity: 1; box-shadow: 0 0 12px rgba(255,255,255,.35); }
+  .btn-ist:not(.activ) { opacity: 1; filter: brightness(.75); }
 
   /* ── VIEW ISTORIC ── */
   #view-live     { display: block; }
@@ -213,7 +213,7 @@
     <div class="kpi livrat">
       <div class="val" id="lv-liv">—</div>
       <div class="unit">kWh</div>
-      <div class="lbl">🔼 Livrat<br>în rețea</div>
+      <div class="lbl">🔼 Livrat PV<br>în rețea</div>
     </div>
     <div class="kpi dinpv">
       <div class="val" id="lv-dpv">—</div>
