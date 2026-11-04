@@ -1,11 +1,11 @@
 {
-  "actualizat": "2026-11-04 19:01:35",
+  "actualizat": "2026-11-04 19:06:08",
   "live": {
     "azi_pv_kwh": 5.21,
     "azi_livrat_kwh": 4.4,
     "azi_din_pv_kwh": 0.81,
-    "azi_din_retea_kwh": 0.85,
-    "azi_consum_kwh": 1.66
+    "azi_din_retea_kwh": 0.87,
+    "azi_consum_kwh": 1.68
   },
   "zile": {
     "2023-06-23": {
@@ -25453,14 +25453,14 @@
       "din_pv_kwh_min": 0.81,
       "din_pv_kwh_max": 0.81,
       "din_pv_kwh_avg": 0.81,
-      "din_retea_kwh_sum": 0.85,
-      "din_retea_kwh_min": 0.85,
-      "din_retea_kwh_max": 0.85,
-      "din_retea_kwh_avg": 0.85,
-      "consum_kwh_sum": 1.66,
-      "consum_kwh_min": 1.66,
-      "consum_kwh_max": 1.66,
-      "consum_kwh_avg": 1.66
+      "din_retea_kwh_sum": 0.87,
+      "din_retea_kwh_min": 0.87,
+      "din_retea_kwh_max": 0.87,
+      "din_retea_kwh_avg": 0.87,
+      "consum_kwh_sum": 1.68,
+      "consum_kwh_min": 1.68,
+      "consum_kwh_max": 1.68,
+      "consum_kwh_avg": 1.68
     }
   },
   "luni": {
@@ -26357,12 +26357,12 @@
       "din_pv_kwh_min": 0.74,
       "din_pv_kwh_max": 0.98,
       "din_pv_kwh_avg": 0.82,
-      "din_retea_kwh_sum": 26.23,
-      "din_retea_kwh_min": 0.85,
+      "din_retea_kwh_sum": 26.25,
+      "din_retea_kwh_min": 0.87,
       "din_retea_kwh_max": 22.88,
       "din_retea_kwh_avg": 6.56,
-      "consum_kwh_sum": 29.5,
-      "consum_kwh_min": 1.66,
+      "consum_kwh_sum": 29.52,
+      "consum_kwh_min": 1.68,
       "consum_kwh_max": 23.86,
       "consum_kwh_avg": 7.38
     }
@@ -26447,12 +26447,12 @@
       "din_pv_kwh_min": 0.48,
       "din_pv_kwh_max": 26.93,
       "din_pv_kwh_avg": 3.22,
-      "din_retea_kwh_sum": 1570.72,
-      "din_retea_kwh_min": 0.85,
+      "din_retea_kwh_sum": 1570.74,
+      "din_retea_kwh_min": 0.87,
       "din_retea_kwh_max": 53.41,
       "din_retea_kwh_avg": 5.13,
-      "consum_kwh_sum": 2556.21,
-      "consum_kwh_min": 1.66,
+      "consum_kwh_sum": 2556.23,
+      "consum_kwh_min": 1.68,
       "consum_kwh_max": 64.86,
       "consum_kwh_avg": 8.35
     }
