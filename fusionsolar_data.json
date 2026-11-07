@@ -1,11 +1,11 @@
 {
-  "actualizat": "2026-11-07 20:26:03",
+  "actualizat": "2026-11-07 20:31:34",
   "live": {
     "azi_pv_kwh": 27.64,
     "azi_livrat_kwh": 8.37,
     "azi_din_pv_kwh": 19.27,
-    "azi_din_retea_kwh": 23.87,
-    "azi_consum_kwh": 43.14
+    "azi_din_retea_kwh": 23.95,
+    "azi_consum_kwh": 43.22
   },
   "zile": {
     "2023-06-23": {
@@ -25519,14 +25519,14 @@
       "din_pv_kwh_min": 19.27,
       "din_pv_kwh_max": 19.27,
       "din_pv_kwh_avg": 19.27,
-      "din_retea_kwh_sum": 23.87,
-      "din_retea_kwh_min": 23.87,
-      "din_retea_kwh_max": 23.87,
-      "din_retea_kwh_avg": 23.87,
-      "consum_kwh_sum": 43.14,
-      "consum_kwh_min": 43.14,
-      "consum_kwh_max": 43.14,
-      "consum_kwh_avg": 43.14
+      "din_retea_kwh_sum": 23.95,
+      "din_retea_kwh_min": 23.95,
+      "din_retea_kwh_max": 23.95,
+      "din_retea_kwh_avg": 23.95,
+      "consum_kwh_sum": 43.22,
+      "consum_kwh_min": 43.22,
+      "consum_kwh_max": 43.22,
+      "consum_kwh_avg": 43.22
     }
   },
   "luni": {
@@ -26423,14 +26423,14 @@
       "din_pv_kwh_min": 0.74,
       "din_pv_kwh_max": 19.27,
       "din_pv_kwh_avg": 3.89,
-      "din_retea_kwh_sum": 70.41,
+      "din_retea_kwh_sum": 70.49,
       "din_retea_kwh_min": 1.07,
-      "din_retea_kwh_max": 23.87,
-      "din_retea_kwh_avg": 10.06,
-      "consum_kwh_sum": 97.62,
+      "din_retea_kwh_max": 23.95,
+      "din_retea_kwh_avg": 10.07,
+      "consum_kwh_sum": 97.7,
       "consum_kwh_min": 1.91,
-      "consum_kwh_max": 43.14,
-      "consum_kwh_avg": 13.95
+      "consum_kwh_max": 43.22,
+      "consum_kwh_avg": 13.96
     }
   },
   "ani": {
@@ -26513,11 +26513,11 @@
       "din_pv_kwh_min": 0.48,
       "din_pv_kwh_max": 26.93,
       "din_pv_kwh_avg": 3.27,
-      "din_retea_kwh_sum": 1614.9,
+      "din_retea_kwh_sum": 1614.98,
       "din_retea_kwh_min": 0.89,
       "din_retea_kwh_max": 53.41,
       "din_retea_kwh_avg": 5.23,
-      "consum_kwh_sum": 2624.33,
+      "consum_kwh_sum": 2624.41,
       "consum_kwh_min": 1.75,
       "consum_kwh_max": 64.86,
       "consum_kwh_avg": 8.49
