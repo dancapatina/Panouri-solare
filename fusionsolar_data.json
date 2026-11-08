@@ -1,8 +1,8 @@
 {
-  "actualizat": "2026-11-08 15:55:58",
+  "actualizat": "2026-11-08 16:01:31",
   "live": {
-    "azi_pv_kwh": 27.29,
-    "azi_livrat_kwh": 21.08,
+    "azi_pv_kwh": 27.55,
+    "azi_livrat_kwh": 21.34,
     "azi_din_pv_kwh": 6.21,
     "azi_din_retea_kwh": 7.2,
     "azi_consum_kwh": 13.41
@@ -25529,14 +25529,14 @@
       "consum_kwh_avg": 43.81
     },
     "2026-11-08": {
-      "pv_kwh_sum": 27.29,
-      "pv_kwh_min": 27.29,
-      "pv_kwh_max": 27.29,
-      "pv_kwh_avg": 27.29,
-      "livrat_kwh_sum": 21.08,
-      "livrat_kwh_min": 21.08,
-      "livrat_kwh_max": 21.08,
-      "livrat_kwh_avg": 21.08,
+      "pv_kwh_sum": 27.55,
+      "pv_kwh_min": 27.55,
+      "pv_kwh_max": 27.55,
+      "pv_kwh_avg": 27.55,
+      "livrat_kwh_sum": 21.34,
+      "livrat_kwh_min": 21.34,
+      "livrat_kwh_max": 21.34,
+      "livrat_kwh_avg": 21.34,
       "din_pv_kwh_sum": 6.21,
       "din_pv_kwh_min": 6.21,
       "din_pv_kwh_max": 6.21,
@@ -26433,14 +26433,14 @@
       "consum_kwh_avg": 8.02
     },
     "2026-11": {
-      "pv_kwh_sum": 84.28,
+      "pv_kwh_sum": 84.54,
       "pv_kwh_min": 1.2,
       "pv_kwh_max": 27.64,
-      "pv_kwh_avg": 10.54,
-      "livrat_kwh_sum": 50.86,
+      "pv_kwh_avg": 10.57,
+      "livrat_kwh_sum": 51.12,
       "livrat_kwh_min": 0.22,
-      "livrat_kwh_max": 21.08,
-      "livrat_kwh_avg": 6.36,
+      "livrat_kwh_max": 21.34,
+      "livrat_kwh_avg": 6.39,
       "din_pv_kwh_sum": 33.42,
       "din_pv_kwh_min": 0.74,
       "din_pv_kwh_max": 19.27,
@@ -26523,11 +26523,11 @@
       "consum_kwh_avg": 9.1
     },
     "2026": {
-      "pv_kwh_sum": 7803.11,
+      "pv_kwh_sum": 7803.37,
       "pv_kwh_min": 0.97,
       "pv_kwh_max": 43.0,
       "pv_kwh_avg": 25.17,
-      "livrat_kwh_sum": 6787.47,
+      "livrat_kwh_sum": 6787.73,
       "livrat_kwh_min": 0.02,
       "livrat_kwh_max": 41.19,
       "livrat_kwh_avg": 21.9,
