@@ -1,11 +1,11 @@
 {
-  "actualizat": "2026-11-17 17:16:21",
+  "actualizat": "2026-11-17 17:21:07",
   "live": {
     "azi_pv_kwh": 11.58,
     "azi_livrat_kwh": 10.68,
     "azi_din_pv_kwh": 0.9,
-    "azi_din_retea_kwh": 0.79,
-    "azi_consum_kwh": 1.69
+    "azi_din_retea_kwh": 0.8,
+    "azi_consum_kwh": 1.7
   },
   "zile": {
     "2023-06-23": {
@@ -25739,14 +25739,14 @@
       "din_pv_kwh_min": 0.9,
       "din_pv_kwh_max": 0.9,
       "din_pv_kwh_avg": 0.9,
-      "din_retea_kwh_sum": 0.79,
-      "din_retea_kwh_min": 0.79,
-      "din_retea_kwh_max": 0.79,
-      "din_retea_kwh_avg": 0.79,
-      "consum_kwh_sum": 1.69,
-      "consum_kwh_min": 1.69,
-      "consum_kwh_max": 1.69,
-      "consum_kwh_avg": 1.69
+      "din_retea_kwh_sum": 0.8,
+      "din_retea_kwh_min": 0.8,
+      "din_retea_kwh_max": 0.8,
+      "din_retea_kwh_avg": 0.8,
+      "consum_kwh_sum": 1.7,
+      "consum_kwh_min": 1.7,
+      "consum_kwh_max": 1.7,
+      "consum_kwh_avg": 1.7
     }
   },
   "luni": {
@@ -26643,12 +26643,12 @@
       "din_pv_kwh_min": 0.74,
       "din_pv_kwh_max": 19.27,
       "din_pv_kwh_avg": 2.83,
-      "din_retea_kwh_sum": 138.66,
-      "din_retea_kwh_min": 0.79,
+      "din_retea_kwh_sum": 138.67,
+      "din_retea_kwh_min": 0.8,
       "din_retea_kwh_max": 30.08,
       "din_retea_kwh_avg": 8.16,
-      "consum_kwh_sum": 186.81,
-      "consum_kwh_min": 1.69,
+      "consum_kwh_sum": 186.82,
+      "consum_kwh_min": 1.7,
       "consum_kwh_max": 43.81,
       "consum_kwh_avg": 10.99
     }
@@ -26733,12 +26733,12 @@
       "din_pv_kwh_min": 0.48,
       "din_pv_kwh_max": 26.93,
       "din_pv_kwh_avg": 3.23,
-      "din_retea_kwh_sum": 1683.15,
-      "din_retea_kwh_min": 0.79,
+      "din_retea_kwh_sum": 1683.16,
+      "din_retea_kwh_min": 0.8,
       "din_retea_kwh_max": 53.41,
       "din_retea_kwh_avg": 5.28,
-      "consum_kwh_sum": 2713.52,
-      "consum_kwh_min": 1.69,
+      "consum_kwh_sum": 2713.53,
+      "consum_kwh_min": 1.7,
       "consum_kwh_max": 64.86,
       "consum_kwh_avg": 8.51
     }
