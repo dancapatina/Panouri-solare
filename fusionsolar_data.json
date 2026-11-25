@@ -1,11 +1,11 @@
 {
-  "actualizat": "2026-11-25 17:26:03",
+  "actualizat": "2026-11-25 17:31:24",
   "live": {
     "azi_pv_kwh": 14.29,
     "azi_livrat_kwh": 13.31,
     "azi_din_pv_kwh": 0.98,
-    "azi_din_retea_kwh": 0.83,
-    "azi_consum_kwh": 1.81
+    "azi_din_retea_kwh": 0.84,
+    "azi_consum_kwh": 1.82
   },
   "zile": {
     "2023-06-23": {
@@ -25915,14 +25915,14 @@
       "din_pv_kwh_min": 0.98,
       "din_pv_kwh_max": 0.98,
       "din_pv_kwh_avg": 0.98,
-      "din_retea_kwh_sum": 0.83,
-      "din_retea_kwh_min": 0.83,
-      "din_retea_kwh_max": 0.83,
-      "din_retea_kwh_avg": 0.83,
-      "consum_kwh_sum": 1.81,
-      "consum_kwh_min": 1.81,
-      "consum_kwh_max": 1.81,
-      "consum_kwh_avg": 1.81
+      "din_retea_kwh_sum": 0.84,
+      "din_retea_kwh_min": 0.84,
+      "din_retea_kwh_max": 0.84,
+      "din_retea_kwh_avg": 0.84,
+      "consum_kwh_sum": 1.82,
+      "consum_kwh_min": 1.82,
+      "consum_kwh_max": 1.82,
+      "consum_kwh_avg": 1.82
     }
   },
   "luni": {
@@ -26819,14 +26819,14 @@
       "din_pv_kwh_min": 0.74,
       "din_pv_kwh_max": 19.27,
       "din_pv_kwh_avg": 2.73,
-      "din_retea_kwh_sum": 158.56,
-      "din_retea_kwh_min": 0.83,
+      "din_retea_kwh_sum": 158.57,
+      "din_retea_kwh_min": 0.84,
       "din_retea_kwh_max": 30.08,
       "din_retea_kwh_avg": 6.34,
-      "consum_kwh_sum": 226.87,
+      "consum_kwh_sum": 226.88,
       "consum_kwh_min": 1.77,
       "consum_kwh_max": 43.81,
-      "consum_kwh_avg": 9.07
+      "consum_kwh_avg": 9.08
     }
   },
   "ani": {
@@ -26909,11 +26909,11 @@
       "din_pv_kwh_min": 0.48,
       "din_pv_kwh_max": 26.93,
       "din_pv_kwh_avg": 3.21,
-      "din_retea_kwh_sum": 1703.05,
-      "din_retea_kwh_min": 0.83,
+      "din_retea_kwh_sum": 1703.06,
+      "din_retea_kwh_min": 0.84,
       "din_retea_kwh_max": 53.41,
       "din_retea_kwh_avg": 5.21,
-      "consum_kwh_sum": 2753.58,
+      "consum_kwh_sum": 2753.59,
       "consum_kwh_min": 1.75,
       "consum_kwh_max": 64.86,
       "consum_kwh_avg": 8.42
